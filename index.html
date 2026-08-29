@@ -1452,7 +1452,7 @@ function computeLeadFlowAlerts(){
   // Google Ads is excluded here: its CRM campaign-name match rate is separately known to be
   // low because of a UTM-tagging mismatch (documented in the footer), not lost leads, so
   // including it would double-report the same known issue as a false "breakage" signal.
-  const adsRows = ALL_ADS.filter(r => matchesPeriodOnly(r) && (state.degree==='All'||r.degree===state.degree) && r.channel!=='Google Ads');
+  const adsRows = ALL_ADS.filter(r => matchesPeriodOnly(r) && degreeChannelMatch(r) && r.channel!=='Google Ads');
   const crmMap = new Map();
   for(const r of crmRows){
     let o = crmMap.get(r.campaign);
@@ -1522,7 +1522,7 @@ function computeCampaignTrendAlerts(){
     const bucket = firstSet.has(p) ? o.base : o.recent;
     bucket.leads += r.leads; bucket.won += r.won;
   }
-  const adsRows = ALL_ADS.filter(r => state.degree==='All'||r.degree===state.degree);
+  const adsRows = ALL_ADS.filter(degreeChannelMatch);
   for(const r of adsRows){
     const p = r[state.gran];
     if(!firstSet.has(p) && !secondSet.has(p)) continue;
