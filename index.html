@@ -495,7 +495,7 @@
   </div>
 
   <div id="bdeView" style="display:none;">
-    <div class="scope-note">A BDE&rsquo;s leads come almost entirely from one team already &mdash; Saudi-assigned BDEs work Saudi leads, Global-assigned BDEs work everyone else &mdash; so both teams are always shown side by side here, scoped only to the selected date range. Degree/University/Program/Channel/Country/Region/Entity filters above don&rsquo;t apply to this tab (BDE data isn&rsquo;t cross-tabbed with those). A handful of BDEs who&rsquo;ve left the team or only assign leads to others are excluded from this list entirely. <strong>Admissions here are CRM Admission Done status, not the Payment sheet</strong> (unlike the rest of the report) &mdash; the Payment sheet&rsquo;s BDE names don&rsquo;t reliably match the CRM&rsquo;s (first-name-only vs. full name, and a few names in one sheet don&rsquo;t appear in the other at all), so a per-BDE join would risk crediting the wrong person.</div>
+    <div class="scope-note">A BDE&rsquo;s leads come almost entirely from one team already &mdash; Saudi-assigned BDEs work Saudi leads, Global-assigned BDEs work everyone else &mdash; so both teams are always shown side by side here, scoped only to the selected date range. Degree/University/Program/Channel/Country/Region/Entity filters above don&rsquo;t apply to this tab (BDE data isn&rsquo;t cross-tabbed with those). A handful of BDEs who&rsquo;ve left the team or only assign leads to others are excluded from this list entirely. <strong>Admissions here are CRM Admission Done status, not the Payment sheet</strong> (unlike the rest of the report) &mdash; the Payment sheet&rsquo;s BDE names don&rsquo;t reliably match the CRM&rsquo;s (first-name-only vs. full name, and a few names in one sheet don&rsquo;t appear in the other at all), so a per-BDE join would risk crediting the wrong person for their actual performance numbers. The Alerts tab&rsquo;s reconciliation card does attempt a conservative best-effort name match for its &ldquo;missing per BDE&rdquo; estimate specifically (falling back to &ldquo;no match&rdquo; rather than guessing on anything ambiguous) &mdash; that&rsquo;s a lower-stakes, clearly-labeled estimate meant to point at who to check, not a performance figure, which is why it&rsquo;s only used there and not here.</div>
     <div class="entity-split">
       <div class="entity-col is-global">
         <div class="entity-head"><span class="entity-dot"></span><h2>Global BDEs</h2></div>
@@ -642,7 +642,7 @@
 
     <div class="card alert-card" style="margin-bottom:14px;">
       <h2>Payments not yet reflected in CRM <span class="alert-count" id="alertPaymentCount"></span></h2>
-      <div class="chint">Compares admissions confirmed in the Payment sheet (finance&rsquo;s own record, by its 6th-to-5th payment-cycle month &mdash; e.g. &ldquo;2026-08&rdquo; covers 6 Aug&ndash;5 Sep) against leads marked Admission Done in the CRM for the same entity and month. A positive gap means the Payment sheet has more confirmed admissions than the CRM shows &mdash; a sign the payment was recorded but the lead&rsquo;s CRM status was never updated. &ldquo;BDEs this cycle&rdquo; lists who has Payment-sheet admissions in that month (count in parentheses) as a starting point for tracking down the gap &mdash; the sheet has no way to point at the exact missing lead, only the aggregate gap, so treat this as who to check first, not a precise match. Names are the Payment sheet&rsquo;s own spelling (not reconciled to CRM owner names &mdash; see the BDE Performance tab). This looks at the whole selected range at once, like the lead-flow check above.</div>
+      <div class="chint">Compares admissions confirmed in the Payment sheet (finance&rsquo;s own record, by its 6th-to-5th payment-cycle month &mdash; e.g. &ldquo;2026-08&rdquo; covers 6 Aug&ndash;5 Sep) against leads marked Admission Done in the CRM for the same entity and month. A positive gap means the Payment sheet has more confirmed admissions than the CRM shows &mdash; a sign the payment was recorded but the lead&rsquo;s CRM status was never updated. <strong>&ldquo;Missing per BDE&rdquo;</strong> is an estimate: each Payment-sheet BDE name is best-effort matched to a CRM owner (the Payment sheet often uses first names only, e.g. &ldquo;Fazal&rdquo; &rarr; &ldquo;Muhammed Fazal Tk&rdquo;), then that owner&rsquo;s CRM Admission Done count is subtracted from the BDE&rsquo;s Payment-sheet count for the same cycle. The Payment sheet has no shared ID with CRM, so this can&rsquo;t point at the exact missing lead &mdash; treat it as which BDE to check first and roughly how many, not a precise count. A name is only matched when it maps to exactly one active CRM owner (ambiguous or unrecognized names, including departed BDEs, show &ldquo;no CRM match &mdash; check manually&rdquo; rather than a guessed number). This looks at the whole selected range at once, like the lead-flow check above.</div>
       <div class="tablewrap"><table id="alertPaymentTable">
         <thead><tr>
           <th class="num">Month</th>
@@ -650,7 +650,7 @@
           <th class="num">Payment sheet admissions</th>
           <th class="num">CRM Admission Done</th>
           <th class="num">Gap</th>
-          <th style="min-width:220px;">BDEs this cycle</th>
+          <th style="min-width:260px;">Missing per BDE (estimated)</th>
         </tr></thead>
         <tbody id="alertPaymentBody"></tbody>
       </table></div>
@@ -1981,19 +1981,54 @@ function computeLeadFlowAlerts(){
 // updated to Admission Done - exactly the "payments missed in CRM" scenario this sheet exists to
 // catch. A negative gap (CRM ahead of Payment sheet) is left unflagged - that's just an admission
 // not yet logged in this month's payment cycle, not a CRM data-quality issue.
+// Best-effort match from a Payment-sheet BDE name (often first-name-only, e.g. "Fazal") to a
+// CRM owner's full name (e.g. "Muhammed Fazal Tk") from the active roster (ALL_BDE, already
+// excludes departed BDEs). Deliberately conservative: exact match, then an exact-token match
+// (the payment name equals one whole word of the CRM name, catching a name in any position, not
+// just first), then a same-direction prefix match on a token (catches concatenated/short forms
+// like "Deepak" -> "DeepakCM"). If more than one CRM owner matches equally (e.g. bare "Allan"
+// against both "Allan Daniel" and "Allan Suresh") it's treated as unmatched/ambiguous rather than
+// guessing. Genuine spelling variants that aren't a substring either way (e.g. "Rahmat" vs
+// "Rahamatulla Sayed") won't be caught by design - a wrong match would misattribute a real gap to
+// the wrong person, which is worse than reporting "no match found".
+function matchPaymentBdeToOwner(paymentBde, ownerList){
+  const p = paymentBde.trim().toLowerCase();
+  if(!p) return null;
+  const exact = ownerList.filter(o=>o.toLowerCase()===p);
+  if(exact.length===1) return exact[0];
+  if(exact.length>1) return null;
+  const tokenMatches = ownerList.filter(o=>o.toLowerCase().split(/\s+/).includes(p));
+  if(tokenMatches.length===1) return tokenMatches[0];
+  if(tokenMatches.length>1) return null;
+  const prefixMatches = ownerList.filter(o=>{
+    return o.toLowerCase().split(/\s+/).some(tok => (tok.length>=4 && p.length>=4) && (tok.startsWith(p) || p.startsWith(tok)));
+  });
+  if(prefixMatches.length===1) return prefixMatches[0];
+  return null;
+}
+
 // Surfaces which BDE(s) had Payment-sheet admissions in a gap month, so the person doing the CRM
-// clean-up knows who to check first. This can't point at the exact missing lead - the Payment
-// sheet has no CRM LeadId to join on, only an aggregate month/entity gap - so it's framed as
-// "these BDEs have admissions recorded this cycle, worth cross-checking their leads' CRM status"
-// rather than a precise per-record match. Uses the Payment sheet's own BDE spelling directly
-// (not reconciled against the CRM's owner names - see the BDE Performance tab's note on why that
-// join isn't reliable); the user knows their own team well enough to recognize first names.
+// clean-up knows who to check first, and roughly how many of each BDE's admissions look
+// unreflected in CRM. This still can't point at the exact missing lead - the Payment sheet has no
+// CRM LeadId to join on - so the per-BDE number is itself an estimate: [that BDE's Payment-sheet
+// admissions this cycle] minus [CRM Admission Done leads owned by their best-effort-matched CRM
+// counterpart, same cycle], floored at 0. Names with no confident match (departed BDEs, or a
+// spelling variant matchPaymentBdeToOwner doesn't catch) show as "no CRM match" rather than a
+// guessed number - treat those as "check manually," not "definitely 0 missing."
 function computePaymentReconciliationAlerts(){
+  const ownerList = Array.from(new Set(ALL_BDE.map(r=>r.owner)));
   const rows = [];
   ['Global','Saudi'].forEach(ent=>{
     const crmRows = ALL_CRM.filter(r=>r.entity===ent && matchesDate(r) && degreeChannelMatch(r));
     const crmWonByMonth = new Map();
     for(const r of crmRows){ if(r.won>0) crmWonByMonth.set(r.month, (crmWonByMonth.get(r.month)||0)+r.won); }
+    const bdeWonByMonthOwner = new Map(); // month -> Map(owner -> won)
+    for(const r of ALL_BDE){
+      if(r.entity!==ent) continue;
+      if(!bdeWonByMonthOwner.has(r.month)) bdeWonByMonthOwner.set(r.month, new Map());
+      const m = bdeWonByMonthOwner.get(r.month);
+      m.set(r.owner, (m.get(r.owner)||0)+r.won);
+    }
     const payRows = ALL_PAYMENTS.filter(r=>r.entity===ent && paymentMatchesDate(r) && paymentDimMatch(r));
     const payByMonth = new Map();
     const bdeByMonth = new Map();
@@ -2009,9 +2044,15 @@ function computePaymentReconciliationAlerts(){
       const payCount = payByMonth.get(m)||0;
       const gap = payCount - crmCount;
       if(gap>=1){
+        const ownerWonThisMonth = bdeWonByMonthOwner.get(m) || new Map();
         const bdes = Array.from((bdeByMonth.get(m)||new Map()).entries())
-          .sort((a,b)=>b[1]-a[1])
-          .map(([bde,n])=>`${bde} (${n})`);
+          .map(([bde,payN])=>{
+            const matchedOwner = matchPaymentBdeToOwner(bde, ownerList);
+            const crmN = matchedOwner!=null ? (ownerWonThisMonth.get(matchedOwner)||0) : null;
+            const missing = matchedOwner!=null ? Math.max(0, payN-crmN) : null;
+            return {bde, payN, matchedOwner, crmN, missing};
+          })
+          .sort((a,b)=>(b.missing!=null?b.missing:-1)-(a.missing!=null?a.missing:-1));
         rows.push({entity:ent, month:m, crmCount, payCount, gap, bdes});
       }
     }
@@ -2198,7 +2239,10 @@ function renderAlerts(){
       <td class="num">${fmtInt(r.payCount)}</td>
       <td class="num">${fmtInt(r.crmCount)}</td>
       <td class="num">+${fmtInt(r.gap)}</td>
-      <td>${r.bdes.join(', ')}</td>
+      <td>${r.bdes.map(b => b.matchedOwner!=null
+        ? `${b.bde} &mdash; ~${fmtInt(b.missing)} missing <span class="idata-inline" style="display:inline;margin:0;">(${b.payN} recorded, matched to ${b.matchedOwner})</span>`
+        : `${b.bde} &mdash; ${b.payN} recorded <span class="idata-inline" style="display:inline;margin:0;">(no CRM match, check manually)</span>`
+      ).join('<br>')}</td>
     </tr>`).join('') || '<tr><td colspan="6" class="empty-state">No gaps found &mdash; every payment-sheet admission for this range has a matching Admission Done record in CRM.</td></tr>';
 
   const bdeDrops = computeBdeDropAlerts();
