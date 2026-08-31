@@ -702,11 +702,11 @@
   </div>
 
   <div id="changesView" style="display:none;">
-    <div class="scope-note">This tab is about <strong>impact</strong>, not a log for its own sake &mdash; for every change (a budget move, a targeting tweak, a new creative, a scale-up/scale-down/pause call) it compares the 14 days before vs. after and tells you whether it worked: what happened to leads/CPL/conversion <em>and</em>, separately, what happened to lead quality (Prospect and Hot Prospect rates). Meta and Google Ads changes below are pulled automatically from each platform&rsquo;s own change history &mdash; no need to log those by hand. LinkedIn Ads has no change-history API, so LinkedIn changes (and anything Meta/Google didn&rsquo;t capture, e.g. creative swaps made outside Ads Manager) still need the manual log. The manual log is saved only in this browser (not synced across devices, and not shared between the Claude-hosted link and any copy published elsewhere).</div>
+    <div class="scope-note">This tab is about <strong>impact</strong>, not a log for its own sake &mdash; for every change (a budget move, a targeting tweak, a new creative, a scale-up/scale-down/pause call) it shows three reads: whether the decision was <strong>justified</strong> by how the campaign was already trending in the weeks before it was made (so a campaign paused or scaled down because of a real, pre-existing lead-quality or CPL problem reads as the right call, not as "leads dropped after" &mdash; which they mechanically will after any pause), what happened to leads/CPL/conversion in the 14 days after vs. before, and separately what happened to lead quality (Prospect and Hot Prospect rates). This applies to every channel automatically for Meta and Google &mdash; both are pulled from each platform&rsquo;s own change history, no need to log those by hand. LinkedIn Ads has no change-history API, so LinkedIn changes (and anything Meta/Google didn&rsquo;t capture, e.g. creative swaps made outside Ads Manager) still need the manual log below. One data limit worth knowing: Meta/Google&rsquo;s own change history doesn&rsquo;t record the old budget value for a budget change (confirmed empirically), so for auto-pulled budget changes this dashboard can&rsquo;t tell whether it was an increase or a decrease &mdash; the trend read still shows, just without a "was this justified" framing; logging those manually (mentioning "increased"/"reduced") gets the full read. The manual log is saved only in this browser (not synced across devices, and not shared between the Claude-hosted link and any copy published elsewhere).</div>
 
     <div class="card alert-card" style="margin-bottom:14px;">
       <h2>Platform-detected changes &amp; their impact <span class="alert-count" id="platformChangeCount"></span> <span class="chint-inline">(Meta &amp; Google Ads)</span></h2>
-      <div class="chint">Pulled from each platform&rsquo;s own change history (Facebook Ads Manager&rsquo;s Activity Log / Google Ads&rsquo; Change History), filtered down to changes a person made &mdash; automated status churn, ad-review pings, and admin/user-role events are excluded. <strong>Both platforms only retain a rolling ~2&ndash;3 week window</strong>, not the full campaign lifetime &mdash; this list won&rsquo;t reach further back than that even with a wider date range selected, and will cover a little more history each time this dashboard is refreshed. &ldquo;What happened&rdquo; shows the performance verdict (Scale/Optimize/Pause/Insufficient data) and, where the data supports it, a separate lead-quality verdict. Respects the Entity and date-range filters above only (not Degree/Program/Channel/Country/Region).</div>
+      <div class="chint">Pulled from each platform&rsquo;s own change history (Facebook Ads Manager&rsquo;s Activity Log / Google Ads&rsquo; Change History), filtered down to changes a person made &mdash; automated status churn, ad-review pings, and admin/user-role events are excluded. <strong>Both platforms only retain a rolling ~2&ndash;3 week window</strong>, not the full campaign lifetime &mdash; this list won&rsquo;t reach further back than that even with a wider date range selected, and will cover a little more history each time this dashboard is refreshed. &ldquo;Impact&rdquo; shows the pre-change trend read, the performance verdict (Scale/Optimize/Pause/Insufficient data), and, where the data supports it, a separate lead-quality verdict. Respects the Entity and date-range filters above only (not Degree/Program/Channel/Country/Region).</div>
       <div class="tablewrap"><table id="platformChangeTable">
         <thead><tr>
           <th class="num">Date</th><th>Platform</th><th>Entity</th><th>Campaign</th><th>Category</th><th style="min-width:220px;">What changed</th><th style="min-width:260px;">Impact</th>
@@ -2311,6 +2311,12 @@ function saveChangeLog(){
 function computeChangeImpact(entry){
   const beforeRange = {from: addDays(entry.date,-14), to: addDays(entry.date,-1)};
   const afterRange = {from: entry.date, to: addDays(entry.date,14)};
+  // "earlier" is the 14 days before *that* - i.e. the window leading INTO the before-window.
+  // Comparing earlier->before shows how the campaign was already trending at the moment the
+  // decision was made, independent of what happened after - needed to judge a pause/scale-down
+  // fairly (see readPerfSet's isPause handling below for why after-the-fact leads/CPL can't judge
+  // a pause on their own).
+  const earlierRange = {from: addDays(entry.date,-28), to: addDays(entry.date,-15)};
   function metricsFor(range){
     let crmRows = ALL_CRM.filter(r => r.day>=range.from && r.day<=range.to);
     let adsRows = ALL_ADS.filter(r => r.day>=range.from && r.day<=range.to);
@@ -2334,70 +2340,131 @@ function computeChangeImpact(entry){
       prospectRate: conv[0].pct, hotProspectRate: conv[1].pct
     };
   }
-  return {before: metricsFor(beforeRange), after: metricsFor(afterRange)};
+  return {before: metricsFor(beforeRange), after: metricsFor(afterRange), earlier: metricsFor(earlierRange)};
 }
 
-// Turns the auto-computed before/after metrics into one plain-English sentence with the actual
-// data points inline, plus a heuristic working/not-working read (leads, CPL, and conversion each
-// vote; majority wins, tie/no-signal reads as mixed/inconclusive). The user's own "Outcome"
-// dropdown always overrides this - the heuristic is a starting suggestion, not the final word.
-function impactStatement(entry, impact){
-  const b = impact.before, a = impact.after;
-  const parts = [];
-  let signals = 0, positive = 0;
+// Guesses whether a change was an increase/scale-up or a decrease/scale-down/pause, so the
+// pre-change-trend read below can be worded as "was this justified" instead of a flat fact.
+// 'Campaign paused'/'Campaign launched' are unambiguous (Meta's own run-status field). Everything
+// else - including every Meta/Google "Budget change" this pipeline has pulled so far - has no
+// usable old-value in the platform's own change history (checked empirically: 0 of 38 budget-
+// change rows had a parseable old value, only the new value survives), so direction there can only
+// come from keyword-matching the free-text description - meaning it's effectively only known for
+// manually logged entries where the user wrote e.g. "increased budget" themselves, not for
+// auto-pulled Meta/Google budget changes. Returns null (unknown) rather than guessing.
+function inferChangeDirection(entry){
+  if(entry.category === 'Campaign paused') return 'down';
+  if(entry.category === 'Campaign launched') return 'up';
+  const d = (entry.description||'').toLowerCase();
+  const up = /increas|raised|\braise\b|boost|scaled? up|scale up|ramp(ed)? up|higher budget/.test(d);
+  const down = /decreas|reduc|\bcut\b|\blower(ed)?\b|scaled? down|scale down|dial(ed)? back|pull(ed)? back|\bpaus/.test(d);
+  if(up && !down) return 'up';
+  if(down && !up) return 'down';
+  return null;
+}
 
-  const leadsChange = b.leads>0 ? (a.leads-b.leads)/b.leads*100 : null;
-  parts.push(`leads ${fmtInt(b.leads)}&rarr;${fmtInt(a.leads)}${leadsChange!=null?` (${leadsChange>=0?'+':''}${leadsChange.toFixed(0)}%)`:''}`);
-  if(leadsChange!=null){ signals++; if(leadsChange>=8) positive++; else if(leadsChange<=-8) positive--; }
+// Leads/CPL/conversion vote-and-describe pass, shared by both the after-vs-before performance
+// verdict and the pre-change trend read (same 3 metrics, different pair of windows: x is the
+// earlier point, y the later one). opts.skipLeadsVote/expectedDrop exist for the pause case: after
+// a pause leads mechanically collapse toward zero - that's the intended effect, not a signal the
+// pause was wrong - so it's still shown for context but excluded from the vote.
+function readPerfSet(x, y, opts){
+  opts = opts || {};
+  const parts = []; let signals = 0, positive = 0;
+  const leadsChange = x.leads>0 ? (y.leads-x.leads)/x.leads*100 : null;
+  let leadsStr = `leads ${fmtInt(x.leads)}&rarr;${fmtInt(y.leads)}${leadsChange!=null?` (${leadsChange>=0?'+':''}${leadsChange.toFixed(0)}%)`:''}`;
+  if(opts.expectedDrop) leadsStr += ' (expected after a pause)';
+  parts.push(leadsStr);
+  if(leadsChange!=null && !opts.skipLeadsVote){ signals++; if(leadsChange>=8) positive++; else if(leadsChange<=-8) positive--; }
 
-  let cplChange = null;
-  if(b.cpl!=null && a.cpl!=null){
-    cplChange = b.cpl>0 ? (a.cpl-b.cpl)/b.cpl*100 : null;
-    parts.push(`CPL AED ${fmtMoney(b.cpl)}&rarr;AED ${fmtMoney(a.cpl)}${cplChange!=null?` (${cplChange>=0?'+':''}${cplChange.toFixed(0)}%)`:''}`);
+  if(x.cpl!=null && y.cpl!=null){
+    const cplChange = x.cpl>0 ? (y.cpl-x.cpl)/x.cpl*100 : null;
+    parts.push(`CPL AED ${fmtMoney(x.cpl)}&rarr;AED ${fmtMoney(y.cpl)}${cplChange!=null?` (${cplChange>=0?'+':''}${cplChange.toFixed(0)}%)`:''}`);
     if(cplChange!=null){ signals++; if(cplChange<=-8) positive++; else if(cplChange>=8) positive--; }
   }
-
-  let convDelta = null;
-  if(b.convRate!=null && a.convRate!=null){
-    convDelta = a.convRate-b.convRate;
-    parts.push(`conversion ${fmtPct(b.convRate)}&rarr;${fmtPct(a.convRate)} (${convDelta>=0?'+':''}${convDelta.toFixed(1)}pts)`);
+  if(x.convRate!=null && y.convRate!=null){
+    const convDelta = y.convRate-x.convRate;
+    parts.push(`conversion ${fmtPct(x.convRate)}&rarr;${fmtPct(y.convRate)} (${convDelta>=0?'+':''}${convDelta.toFixed(1)}pts)`);
     signals++; if(convDelta>=1) positive++; else if(convDelta<=-1) positive--;
   }
+  return {parts, signals, positive};
+}
 
-  let verdict = 'Not enough data yet', verdictSev = 'muted';
-  if(signals>0){
-    if(positive>=Math.max(2,Math.ceil(signals*0.6))){ verdict='Looks positive so far'; verdictSev='good'; }
-    else if(positive<=-Math.max(2,Math.ceil(signals*0.6))){ verdict='Looks negative so far'; verdictSev='critical'; }
-    else { verdict='Mixed signal'; verdictSev='warning'; }
+// Prospect/Hot Prospect qualification-rate vote-and-describe pass - same shape as readPerfSet,
+// kept as a separate function (not folded in) since the performance verdict and lead-quality
+// verdict are deliberately shown as two distinct chips, never blended into one score.
+function readQualitySet(x, y){
+  const parts = []; let signals = 0, positive = 0;
+  if(x.prospectRate!=null && y.prospectRate!=null){
+    const d = y.prospectRate - x.prospectRate;
+    parts.push(`prospect rate ${fmtPct(x.prospectRate)}&rarr;${fmtPct(y.prospectRate)} (${d>=0?'+':''}${d.toFixed(1)}pts)`);
+    signals++; if(d>=1) positive++; else if(d<=-1) positive--;
   }
+  if(x.hotProspectRate!=null && y.hotProspectRate!=null){
+    const d = y.hotProspectRate - x.hotProspectRate;
+    parts.push(`hot prospect rate ${fmtPct(x.hotProspectRate)}&rarr;${fmtPct(y.hotProspectRate)} (${d>=0?'+':''}${d.toFixed(1)}pts)`);
+    signals++; if(d>=0.5) positive++; else if(d<=-0.5) positive--;
+  }
+  return {parts, signals, positive};
+}
 
-  // Lead quality is deliberately a separate read from the performance verdict above (leads/CPL/
-  // conversion) - a change can look good on volume or cost while quietly pulling in lower-intent
-  // leads, or vice versa, so this shouldn't be blended into the same score.
-  const qualityParts = [];
-  let qSignals = 0, qPositive = 0;
-  if(b.prospectRate!=null && a.prospectRate!=null){
-    const d = a.prospectRate - b.prospectRate;
-    qualityParts.push(`prospect rate ${fmtPct(b.prospectRate)}&rarr;${fmtPct(a.prospectRate)} (${d>=0?'+':''}${d.toFixed(1)}pts)`);
-    qSignals++; if(d>=1) qPositive++; else if(d<=-1) qPositive--;
-  }
-  if(b.hotProspectRate!=null && a.hotProspectRate!=null){
-    const d = a.hotProspectRate - b.hotProspectRate;
-    qualityParts.push(`hot prospect rate ${fmtPct(b.hotProspectRate)}&rarr;${fmtPct(a.hotProspectRate)} (${d>=0?'+':''}${d.toFixed(1)}pts)`);
-    qSignals++; if(d>=0.5) qPositive++; else if(d<=-0.5) qPositive--;
-  }
-  let qualityVerdict = null, qualitySev = 'muted';
-  if(qSignals>0){
-    if(qPositive>=1 && qPositive===qSignals){ qualityVerdict='Lead quality improved'; qualitySev='good'; }
-    else if(qPositive<=-1 && qPositive===-qSignals){ qualityVerdict='Lead quality declined'; qualitySev='critical'; }
-    else { qualityVerdict='Lead quality mixed/steady'; qualitySev='warning'; }
+function verdictFrom(signals, positive, labels){
+  if(signals===0) return {verdict: labels.none || 'Not enough data yet', sev:'muted'};
+  const thresh = Math.max(2, Math.ceil(signals*0.6));
+  if(positive>=thresh) return {verdict: labels.pos, sev:'good'};
+  if(positive<=-thresh) return {verdict: labels.neg, sev:'critical'};
+  return {verdict: labels.mixed, sev:'warning'};
+}
+
+// Turns the auto-computed before/after/earlier metrics into plain-English sentences plus three
+// independent heuristic verdicts: (1) a pre-change trend read - was the campaign already
+// declining/improving *before* this decision was made, which is what actually judges whether a
+// pause/scale-up/scale-down was the right call (a good campaign paused on a bad day still shows
+// "leads dropped after" but was fine beforehand, and vice versa); (2) the existing after-vs-before
+// performance read (leads/CPL/conversion); (3) the existing lead-quality read (Prospect/Hot
+// Prospect rate). The user's own "Outcome" dropdown always overrides all three - these are a
+// starting suggestion, not the final word.
+function impactStatement(entry, impact){
+  const b = impact.before, a = impact.after, e = impact.earlier;
+  const isPause = entry.category === 'Campaign paused';
+
+  const perf = readPerfSet(b, a, {skipLeadsVote:isPause, expectedDrop:isPause});
+  const perfV = verdictFrom(perf.signals, perf.positive, {pos:'Looks positive so far', neg:'Looks negative so far', mixed:'Mixed signal', none:'Not enough data yet'});
+
+  const qual = readQualitySet(b, a);
+  const qualV = qual.signals>0 ? verdictFrom(qual.signals, qual.positive, {pos:'Lead quality improved', neg:'Lead quality declined', mixed:'Lead quality mixed/steady'}) : null;
+
+  const trendPerf = readPerfSet(e, b, {});
+  const trendQual = readQualitySet(e, b);
+  const trendSignals = trendPerf.signals + trendQual.signals;
+  const trendPositive = trendPerf.positive + trendQual.positive;
+  const trendParts = trendPerf.parts.concat(trendQual.parts);
+  let trendVerdict = null, trendSev = 'muted', trendText = null;
+  if(trendSignals>0){
+    trendText = `Trend into this change (14 days before vs. the 14 before that): ${trendParts.join(', ')}.`;
+    const thresh = Math.max(2, Math.ceil(trendSignals*0.6));
+    const trendDir = trendPositive>=thresh ? 'up' : trendPositive<=-thresh ? 'down' : 'flat';
+    const direction = inferChangeDirection(entry);
+    if(direction==='down'){
+      if(trendDir==='down'){ trendVerdict='Looks justified &mdash; already declining beforehand'; trendSev='good'; }
+      else if(trendDir==='up'){ trendVerdict='Worth a second look &mdash; was trending up beforehand'; trendSev='critical'; }
+      else { trendVerdict='No clear trend beforehand'; trendSev='warning'; }
+    } else if(direction==='up'){
+      if(trendDir==='up'){ trendVerdict='Scaling a strong performer'; trendSev='good'; }
+      else if(trendDir==='down'){ trendVerdict='Scaling a struggling campaign'; trendSev='critical'; }
+      else { trendVerdict='No clear trend beforehand'; trendSev='warning'; }
+    } else {
+      trendVerdict = trendDir==='up' ? 'Was trending up beforehand' : trendDir==='down' ? 'Was trending down beforehand' : 'No clear trend beforehand';
+      trendSev = 'muted';
+    }
   }
 
   return {
-    text: `In the 14 days after vs. before: ${parts.join(', ')}.`,
-    verdict, verdictSev,
-    qualityText: qualityParts.length ? `Lead quality: ${qualityParts.join(', ')}.` : null,
-    qualityVerdict, qualitySev
+    text: `In the 14 days after vs. before: ${perf.parts.join(', ')}.`,
+    verdict: perfV.verdict, verdictSev: perfV.sev,
+    qualityText: qual.parts.length ? `Lead quality: ${qual.parts.join(', ')}.` : null,
+    qualityVerdict: qualV ? qualV.verdict : null, qualitySev: qualV ? qualV.sev : 'muted',
+    trendText, trendVerdict, trendSev
   };
 }
 
@@ -2420,13 +2487,20 @@ function computePlatformChanges(){
     .sort((a,b)=>b.day.localeCompare(a.day));
 }
 
-// Shared "What happened" cell markup for both the platform-detected and manually-logged change
-// tables: performance verdict (leads/CPL/conversion) first, then a separate lead-quality verdict
-// (Prospect/Hot Prospect qualification rate) - kept visually distinct since a change can score
-// well on one and poorly on the other.
+// Shared "Impact" cell markup for both the platform-detected and manually-logged change tables,
+// three chips stacked in order: (1) pre-change trend read - was this decision justified by how the
+// campaign was already doing beforehand (the answer to "did we pause/scale a good or bad
+// campaign"); (2) the after-vs-before performance verdict (leads/CPL/conversion); (3) the
+// lead-quality verdict (Prospect/Hot Prospect rate) - kept visually distinct from (2) since a
+// change can score well on one and poorly on the other. (1) is omitted when there's no earlier
+// data to compare against (e.g. a brand-new campaign with no history before its launch).
 function renderImpactCell(stmt){
   const chipFor = sev => sev==='good'?'Scale':sev==='critical'?'Pause':sev==='warning'?'Optimize':'Insufficient';
-  let html = `<span class="chip reco-${chipFor(stmt.verdictSev)}">${stmt.verdict}</span><div class="idata-inline">${stmt.text}</div>`;
+  let html = '';
+  if(stmt.trendText){
+    html += `<span class="chip reco-${chipFor(stmt.trendSev)}">${stmt.trendVerdict}</span><div class="idata-inline">${stmt.trendText}</div>`;
+  }
+  html += `<span class="chip reco-${chipFor(stmt.verdictSev)}" style="margin-top:${stmt.trendText?'6px':'0'};display:inline-block;">${stmt.verdict}</span><div class="idata-inline">${stmt.text}</div>`;
   if(stmt.qualityText){
     html += `<span class="chip reco-${chipFor(stmt.qualitySev)}" style="margin-top:6px;display:inline-block;">${stmt.qualityVerdict}</span><div class="idata-inline">${stmt.qualityText}</div>`;
   }
