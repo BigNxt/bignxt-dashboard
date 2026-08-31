@@ -1420,7 +1420,10 @@ function renderBarChart(container, periods, values, secondaryValues, color){
 // "Admission" everywhere else (STATUS_BUCKET, funnelConversions, etc.). Every caller now passes a
 // Payment-sheet admission override into funnelBuckets(), so this bar matches the KPI tiles above
 // it; the "(Payment)" tag just makes that source explicit at a glance.
-const FUNNEL_DISPLAY_LABEL = {'Admission':'Admission (Payment)'};
+// Bucket key 'Qualified' is fed only by the CRM status literally named "Prospect" (see
+// STATUS_BUCKET) - display label corrected to match so it doesn't look like Prospect vanished
+// now that Hot Prospect is broken out into its own row right next to it.
+const FUNNEL_DISPLAY_LABEL = {'Admission':'Admission (Payment)', 'Qualified':'Prospect'};
 function renderFunnel(container, counts){
   container.innerHTML = '';
   const maxV = Math.max(1, ...FUNNEL_ORDER.map(k=>counts[k]||0));
