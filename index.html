@@ -110,12 +110,24 @@
     font-size:12.5px; color:var(--ink); cursor:pointer;
   }
   input[type="date"]{
-    background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:5px 8px;
-    font-size:12.5px; color:var(--ink); font-family:"IBM Plex Mono", monospace; cursor:pointer;
+    position:relative; background:var(--surface); border:1px solid var(--border); border-radius:8px;
+    padding:5px 28px 5px 8px; font-size:12.5px; color:var(--ink); font-family:"IBM Plex Mono", monospace;
+    cursor:pointer;
+    background-repeat:no-repeat; background-position:right 8px center; background-size:14px 14px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232a78d6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E");
   }
-  input[type="date"]::-webkit-calendar-picker-indicator{ cursor:pointer; opacity:.6; }
-  :root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator,
-  :root:not([data-theme="light"]) input[type="date"]::-webkit-calendar-picker-indicator{ filter:invert(1); }
+  /* The native picker-indicator icon is hidden (Chromium/Safari) and replaced with the blue SVG
+     above via background-image, since the native icon is barely visible on a light/white field in
+     some browsers; the indicator itself is kept full-size and transparent so it's still the
+     clickable hit target (Firefox has no equivalent pseudo-element to hide, so it shows its own
+     native icon alongside - a known cross-browser limitation, not a bug). */
+  input[type="date"]::-webkit-calendar-picker-indicator{
+    opacity:0; position:absolute; right:0; top:0; width:100%; height:100%; margin:0; cursor:pointer;
+  }
+  :root[data-theme="dark"] input[type="date"],
+  :root:not([data-theme="light"]) input[type="date"]{
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233987e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E");
+  }
   .datebar-wrap .seg button{ padding:5px 10px; font-size:11.5px; }
   .fgroup.grow{ flex:1 1 auto; justify-content:flex-end; }
   .search-wrap{ position:relative; }
@@ -299,7 +311,7 @@
     <div class="brand-block">
       <div class="eyebrow">BigNxt Group &middot; Marketing &amp; Sales</div>
       <h1 class="brand">Enrollment Funnel Console</h1>
-      <div class="brand-sub">Ad spend (Meta) stitched to CRM lead-and-admissions data, split by entity, degree, and channel.</div>
+      <div class="brand-sub">Ad spend (Meta) stitched to CRM lead-and-admissions data, split by entity, degree, program, and channel.</div>
     </div>
     <div class="asof" id="asOfBlock"></div>
   </header>
@@ -314,6 +326,10 @@
       <div class="seg" id="degreeSeg"></div>
     </div>
     <div class="fgroup">
+      <span class="flabel">Program</span>
+      <select id="programSelect"></select>
+    </div>
+    <div class="fgroup">
       <span class="flabel">Channel</span>
       <select id="channelSelect"></select>
     </div>
@@ -324,10 +340,6 @@
     <div class="fgroup">
       <span class="flabel">Region</span>
       <select id="regionSelect"></select>
-    </div>
-    <div class="fgroup">
-      <span class="flabel">Chart grouping</span>
-      <div class="seg" id="granSeg"></div>
     </div>
     <div class="fgroup datebar-wrap">
       <span class="flabel">Date range</span>
@@ -378,7 +390,7 @@
   </div>
 
   <div id="summaryView" style="display:none;">
-    <div class="scope-note">Global and Saudi run separate budgets and enrollment targets, so this tab always shows both side by side. Degree, Channel, Country and Region filters above narrow both sides; the Entity toggle only affects the Trends tab and the campaign table below.</div>
+    <div class="scope-note">Global and Saudi run separate budgets and enrollment targets, so this tab always shows both side by side. Degree, Program, Channel, Country and Region filters above narrow both sides; the Entity toggle only affects the Trends tab and the campaign table below.</div>
     <div class="entity-split">
       <div class="entity-col is-global">
         <div class="entity-head"><span class="entity-dot"></span><h2>Global team</h2></div>
@@ -440,7 +452,7 @@
   </div>
 
   <div id="bdeView" style="display:none;">
-    <div class="scope-note">A BDE&rsquo;s leads come almost entirely from one team already &mdash; Saudi-assigned BDEs work Saudi leads, Global-assigned BDEs work everyone else &mdash; so both teams are always shown side by side here, scoped only to the selected date range. Degree/Channel/Country/Region/Entity filters above don&rsquo;t apply to this tab (BDE data isn&rsquo;t cross-tabbed with those). A handful of BDEs who&rsquo;ve left the team or only assign leads to others are excluded from this list entirely.</div>
+    <div class="scope-note">A BDE&rsquo;s leads come almost entirely from one team already &mdash; Saudi-assigned BDEs work Saudi leads, Global-assigned BDEs work everyone else &mdash; so both teams are always shown side by side here, scoped only to the selected date range. Degree/Program/Channel/Country/Region/Entity filters above don&rsquo;t apply to this tab (BDE data isn&rsquo;t cross-tabbed with those). A handful of BDEs who&rsquo;ve left the team or only assign leads to others are excluded from this list entirely.</div>
     <div class="entity-split">
       <div class="entity-col is-global">
         <div class="entity-head"><span class="entity-dot"></span><h2>Global BDEs</h2></div>
@@ -491,7 +503,7 @@
   </div>
 
   <div id="recoView" style="display:none;">
-    <div class="scope-note">Scale/Optimize/Pause calls are made <em>within</em> each team and dimension by comparing conversion rate and CAC against that team&rsquo;s own median &mdash; a Global campaign is never compared to a Saudi one. Needs at least 20 leads (or meaningful spend) to get a call; smaller campaigns are marked Insufficient data. Degree/Channel/Country/Region filters above narrow these tables; Entity does not (both teams always shown).</div>
+    <div class="scope-note">Scale/Optimize/Pause calls are made <em>within</em> each team and dimension by comparing conversion rate and CAC against that team&rsquo;s own median &mdash; a Global campaign is never compared to a Saudi one. Needs at least 20 leads (or meaningful spend) to get a call; smaller campaigns are marked Insufficient data. Degree/Program/Channel/Country/Region filters above narrow these tables; Entity does not (both teams always shown).</div>
     <div id="recoGlobalBlock">
       <div class="entity-head is-global-head"><span class="entity-dot" style="background:var(--s1)"></span><h2>Global team</h2></div>
       <div class="card">
@@ -727,9 +739,10 @@
       <li><strong>Funnel stages.</strong> The CRM &ldquo;Status&rdquo; field is a current snapshot, not a stage-entry log, so this funnel shows <em>where leads sit today</em>, not cohort conversion over time. Stages roll up as: New&nbsp;Lead &rarr; Working (Recontactable/Non&nbsp;Contactable/Call&nbsp;Back/Future&nbsp;follow&nbsp;up) &rarr; Qualified (Prospect/Hot&nbsp;Prospect) &rarr; Meeting&nbsp;Scheduled &rarr; Meeting&nbsp;Done &rarr; Application&nbsp;Filled &rarr; Admission&nbsp;Done. Not&nbsp;Interested/Not&nbsp;Eligible/Cold are tracked separately as Lost.</li>
       <li><strong>Campaign join.</strong> Ad spend is matched to CRM leads by exact campaign name, which recovers 94.5% of tracked ad spend across all three platforms (163 of 206 ad campaigns). Unmatched campaigns are usually traffic/awareness objectives that aren&rsquo;t expected to log CRM leads directly &mdash; <strong>except on Google Ads</strong>, where the match rate is unusually low (about 1% of Google spend matched): the CRM&rsquo;s recorded campaign value for Google traffic (e.g. &ldquo;RRU / Africa Search / 18/4/2026 / G&rdquo;) doesn&rsquo;t exactly match the real Google Ads campaign name (&ldquo;RRU / Africa / Search / 18/4/2026 / G&rdquo;) &mdash; likely a UTM-tagging mismatch on the Google side, unlike Meta/LinkedIn where the tagging lines up. Worth fixing at the source so Google spend joins correctly here.</li>
       <li><strong>Stage-to-stage conversion.</strong> Because Status is a snapshot, &ldquo;reached a stage&rdquo; is approximated as leads currently sitting at that stage or any later one &mdash; a lead that reached Meeting Done and was later marked Lost is not counted as having reached it, so these rates are a floor, not exact cohort tracking. &ldquo;Payment&rdquo; is approximated by the <em>Admission Done</em> status, since the CRM export has no separate payment-received field.</li>
-      <li><strong>Summary, BDE, Recommendations &amp; Focus Areas tabs are always entity-split.</strong> Global and Saudi run separate budgets/targets, so these tabs show Global and Saudi side by side rather than toggling between them; the top Entity control only scopes Trends and the campaign table. Degree/Channel/Country/Region filters still narrow Summary/Recommendations (not BDE or Focus Areas&rsquo; region table, which aren&rsquo;t cross-tabbed with those).</li>
+      <li><strong>Summary, BDE, Recommendations &amp; Focus Areas tabs are always entity-split.</strong> Global and Saudi run separate budgets/targets, so these tabs show Global and Saudi side by side rather than toggling between them; the top Entity control only scopes Trends and the campaign table. Degree/Program/Channel/Country/Region filters still narrow Summary/Recommendations (not BDE or Focus Areas&rsquo; region table, which aren&rsquo;t cross-tabbed with those).</li>
       <li><strong>Geography, Country &amp; Region filters.</strong> Geography is read primarily from the campaign&rsquo;s own target-country naming (more reliable than the CRM&rsquo;s free-text Country field), falling back to a normalized Country field for organic/offline leads. Saudi cities (Riyadh/Jeddah/Dammam/Medina) roll up into one Saudi Arabia row. The Region filter groups geographies into three named buckets &mdash; <em>Saudi</em> (Saudi Arabia only), <em>GCC</em> (Kuwait, UAE, Qatar, Oman, Bahrain &mdash; excludes Saudi, tracked separately), and <em>Africa</em> &mdash; countries outside all three (India, US, UK, etc.) are only reachable via the Country dropdown.</li>
-      <li><strong>Date range.</strong> The date pickers filter to the exact day, down to individual leads/spend rows &mdash; not snapped to week or month boundaries. &ldquo;Chart grouping&rdquo; only controls how the Trends charts bucket points on the x-axis (week vs. month), independent of the filtered range.</li>
+      <li><strong>Date range.</strong> The date pickers filter to the exact day, down to individual leads/spend rows &mdash; not snapped to week or month boundaries. The Trends chart&rsquo;s x-axis bucketing (day/week/month) is chosen automatically from the width of the selected range (&le;13 days &rarr; daily points, &le;95 days &rarr; weekly, longer &rarr; monthly) &mdash; there&rsquo;s no separate grouping control to set.</li>
+      <li><strong>Program.</strong> Derived from the leading token of the campaign name (e.g. &ldquo;GEM / Masters In AI / Zambia / &hellip;&rdquo; &rarr; GEM) &mdash; the same convention Geography classification already relies on. Recognized programs: GEM, RRU, EUG, BSc, AIU; campaigns that don&rsquo;t follow this naming convention (kiosks, webinars, bulk uploads, organic, one-off events, etc.) are grouped as &ldquo;Other/Unspecified&rdquo;.</li>
       <li><strong>BDE performance.</strong> One row per CRM &ldquo;Lead owner.&rdquo; &ldquo;Untouched %&rdquo; is the share of a BDE&rsquo;s leads still sitting in an Untouched/Not-enquired sub-status &mdash; a proxy for leads that were never worked, independent of lead quality. Rows are flagged when lead&rarr;admission conversion falls below 60% of their own team&rsquo;s median, restricted to BDEs with at least 10 leads so small books don&rsquo;t get flagged on noise. BDEs who&rsquo;ve left the team or only assign leads to others (not work them) are excluded from tracking entirely, by name.</li>
       <li><strong>Recommendations tab.</strong> Campaigns/geography/channels are scored within their own team by comparing conversion rate and CAC against that team&rsquo;s own median &mdash; <em>Scale</em> (better than median on both, real volume already), <em>Optimize</em> (mixed signals, or acceptable conversion but weak CAC or vice versa), <em>Pause</em> (worse than median on both, with real spend already committed), <em>Insufficient data</em> (under 20 leads and little spend &mdash; too early to call). This is a heuristic ranking, not a budget-allocation model &mdash; use it to prioritize where to look, not as the final word.</li>
       <li><strong>Alerts tab.</strong> Three independent checks: (1) <em>Lead-flow breakage</em> compares the ad platform&rsquo;s own on-platform lead count per campaign against what actually landed in the CRM for the whole selected range &mdash; a large, consistent gap points at a tracking/sync problem, not a marketing one (Google Ads is excluded from this specific check for a separately-documented reason, see Campaign join above). (2) <em>BDE performance drop</em> and (3) <em>Campaign trend degradation</em> split the selected date range exactly in half by day and compare each BDE&rsquo;s or campaign&rsquo;s own second half against its own first half &mdash; make the range wide enough (e.g. 4+ weeks) for both halves to hold a meaningful sample. None of this is available at ad-set/ad/placement level yet since that granularity hasn&rsquo;t been pulled from Supermetrics.</li>
@@ -803,9 +816,24 @@ function getRegion(geo){
   return null;
 }
 
+// Program is derived from the leading "/"-separated token of the campaign name (the same
+// convention Get-CampaignGeo already relies on for Geography), e.g. "GEM / Masters In AI /
+// Zambia / ..." -> "GEM". A handful of Bachelor's campaigns use a "-" separator with a
+// specialization folded into the first token instead (e.g. "BSc Cyber - Saudi ...") - those are
+// normalized back to "BSc". Anything that doesn't match a known program code (kiosks, webinars,
+// bulk uploads, organic, one-off events, etc.) buckets into "Other/Unspecified".
+const KNOWN_PROGRAMS = new Set(['GEM','RRU','EUG','BSC','AIU']);
+function getProgram(campaign){
+  if(!campaign) return 'Other/Unspecified';
+  const first = campaign.split('/')[0].trim();
+  if(/^bsc/i.test(first)) return 'BSc';
+  const upper = first.toUpperCase();
+  return KNOWN_PROGRAMS.has(upper) ? upper : 'Other/Unspecified';
+}
+
 const state = {
-  entity:'All', degree:'All', channel:'All', country:'All', region:'All', gran:'week', view:'trends',
-  dateFrom: MIN_DAY, dateTo: MAX_DAY,
+  entity:'All', degree:'All', program:'All', channel:'All', country:'All', region:'All', gran:'month', view:'trends',
+  dateFrom: MIN_DAY, dateTo: MAX_DAY, quickRange:'all',
   search:'', sortKey:'leads', sortDir:'desc'
 };
 
@@ -853,18 +881,36 @@ function matchesDate(row){
   if(state.dateTo && row.day > state.dateTo) return false;
   return true;
 }
+function matchesProgram(row){
+  return state.program==='All' || getProgram(row.campaign)===state.program;
+}
 function matches(row){
   if(state.entity!=='All' && row.entity!==state.entity) return false;
   if(state.degree!=='All' && row.degree!==state.degree) return false;
+  if(!matchesProgram(row)) return false;
   if(state.channel!=='All' && row.channel!==state.channel) return false;
   if(!matchesGeo(row)) return false;
   return matchesDate(row);
+}
+
+// Trends chart x-axis bucketing is derived from the width of the selected range rather than a
+// separate user toggle - a short range (This week/Last week or a similarly narrow custom range)
+// shown as weekly/monthly buckets would collapse to one nearly-empty point, so day/week/month is
+// picked automatically to always give a readable number of points.
+function autoGranForRange(from, to){
+  const days = Math.round((new Date(to+'T00:00:00') - new Date(from+'T00:00:00'))/86400000);
+  if(days<=13) return 'day';
+  if(days<=95) return 'week';
+  return 'month';
 }
 
 function activePeriods(){
   if(state.gran==='month'){
     const fromM = state.dateFrom.slice(0,7), toM = state.dateTo.slice(0,7);
     return MONTH_PERIODS.filter(p => p>=fromM && p<=toM);
+  }
+  if(state.gran==='day'){
+    return DAY_PERIODS.filter(p => p>=state.dateFrom && p<=state.dateTo);
   }
   return WEEK_PERIODS.filter(p => p<=state.dateTo && addDays(p,6)>=state.dateFrom);
 }
@@ -1363,7 +1409,7 @@ function render(){
 }
 
 function degreeChannelMatch(r){
-  return (state.degree==='All'||r.degree===state.degree) && (state.channel==='All'||r.channel===state.channel) && matchesGeo(r);
+  return (state.degree==='All'||r.degree===state.degree) && matchesProgram(r) && (state.channel==='All'||r.channel===state.channel) && matchesGeo(r);
 }
 
 function fmtDateLabel(dateStr){
@@ -1402,7 +1448,7 @@ function renderSummary(){
       <div class="tile"><div class="tlabel">${t.label}</div><div class="tvalue num">${t.value}</div></div>`).join('');
 
     document.getElementById('summaryFunnelHint'+ent).textContent =
-      `${fmtInt(totalLeads)} ${ent} leads in this date range (Degree/Channel/Country/Region filters applied if set).`;
+      `${fmtInt(totalLeads)} ${ent} leads in this date range (Degree/Program/Channel/Country/Region filters applied if set).`;
     renderFunnel(document.getElementById('summaryFunnelChart'+ent), funnelBuckets(rangeCRM));
     renderFunnelConv(document.getElementById('summaryFunnelConv'+ent), funnelConversions(rangeCRM));
     renderMix(document.getElementById('summaryMixChart'+ent), channelMix(rangeCRM));
@@ -2143,12 +2189,31 @@ function syncDateInputs(){
   document.getElementById('dateFromInput').value = state.dateFrom;
   document.getElementById('dateToInput').value = state.dateTo;
 }
-function setDateRange(from, to){
+// quickKey identifies which quick-select button (if any) produced this range, so it can be
+// highlighted; a manual calendar edit passes no quickKey, which correctly clears the highlight
+// since the resulting range no longer matches any preset.
+function setDateRange(from, to, quickKey){
   state.dateFrom = clampToData(from);
   state.dateTo = clampToData(to);
   if(state.dateFrom>state.dateTo){ const t=state.dateFrom; state.dateFrom=state.dateTo; state.dateTo=t; }
+  state.quickRange = quickKey || null;
+  state.gran = autoGranForRange(state.dateFrom, state.dateTo);
   syncDateInputs();
+  rebuildQuickSeg();
   render();
+}
+
+function rebuildQuickSeg(){
+  buildSeg(document.getElementById('quickDateSeg'), [
+    {label:'This week', value:'tw'}, {label:'Last week', value:'lw'},
+    {label:'This month', value:'tm'}, {label:'Last month', value:'lm'}, {label:'All time', value:'all'}
+  ], state.quickRange, v=>{
+    if(v==='tw') setDateRange(startOfWeek(MAX_DAY), MAX_DAY, v);
+    else if(v==='lw'){ const prevWeekEnd = addDays(startOfWeek(MAX_DAY), -1); setDateRange(startOfWeek(prevWeekEnd), prevWeekEnd, v); }
+    else if(v==='tm') setDateRange(startOfMonth(MAX_DAY), MAX_DAY, v);
+    else if(v==='lm'){ const prevMonthEnd = addDays(startOfMonth(MAX_DAY), -1); setDateRange(startOfMonth(prevMonthEnd), endOfMonth(prevMonthEnd), v); }
+    else setDateRange(MIN_DAY, MAX_DAY, v);
+  });
 }
 
 function init(){
@@ -2172,6 +2237,13 @@ function init(){
   regionSel.innerHTML = '<option value="All">All regions</option><option value="Saudi">Saudi</option><option value="GCC">GCC (excl. Saudi)</option><option value="Africa">Africa</option>';
   regionSel.addEventListener('change', ()=>{ state.region=regionSel.value; render(); });
 
+  const programSel = document.getElementById('programSelect');
+  const programCounts = new Map();
+  for(const r of ALL_CRM){ const p = getProgram(r.campaign); programCounts.set(p, (programCounts.get(p)||0)+r.leads); }
+  const programsOrdered = Array.from(programCounts.entries()).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+  programSel.innerHTML = '<option value="All">All programs</option>' + programsOrdered.map(p=>`<option value="${p}">${p}</option>`).join('');
+  programSel.addEventListener('change', ()=>{ state.program=programSel.value; render(); });
+
   syncDateInputs();
   document.getElementById('dateFromInput').min = MIN_DAY; document.getElementById('dateFromInput').max = MAX_DAY;
   document.getElementById('dateToInput').min = MIN_DAY; document.getElementById('dateToInput').max = MAX_DAY;
@@ -2185,16 +2257,7 @@ function init(){
     inp.addEventListener('click', ()=>{ try{ inp.showPicker(); }catch(e){} });
   });
 
-  buildSeg(document.getElementById('quickDateSeg'), [
-    {label:'This week', value:'tw'}, {label:'Last week', value:'lw'},
-    {label:'This month', value:'tm'}, {label:'Last month', value:'lm'}, {label:'All time', value:'all'}
-  ], null, v=>{
-    if(v==='tw') setDateRange(startOfWeek(MAX_DAY), MAX_DAY);
-    else if(v==='lw'){ const prevWeekEnd = addDays(startOfWeek(MAX_DAY), -1); setDateRange(startOfWeek(prevWeekEnd), prevWeekEnd); }
-    else if(v==='tm') setDateRange(startOfMonth(MAX_DAY), MAX_DAY);
-    else if(v==='lm'){ const prevMonthEnd = addDays(startOfMonth(MAX_DAY), -1); setDateRange(startOfMonth(prevMonthEnd), endOfMonth(prevMonthEnd)); }
-    else setDateRange(MIN_DAY, MAX_DAY);
-  });
+  rebuildQuickSeg();
 
   document.getElementById('campaignSearch').addEventListener('input', (e)=>{ state.search=e.target.value; renderTable(campaignTable(ALL_CRM.filter(matches), ALL_ADS.filter(matches))); });
 
@@ -2210,7 +2273,6 @@ function init(){
   function refreshSegs(){
     buildSeg(document.getElementById('entitySeg'), [{label:'All',value:'All'},{label:'Global',value:'Global'},{label:'Saudi',value:'Saudi'}], state.entity, v=>{ state.entity=v; refreshSegs(); render(); });
     buildSeg(document.getElementById('degreeSeg'), [{label:'All',value:'All'},{label:'Masters',value:'Masters'},{label:'Bachelor',value:'Bachelor'}], state.degree, v=>{ state.degree=v; refreshSegs(); render(); });
-    buildSeg(document.getElementById('granSeg'), [{label:'Week',value:'week'},{label:'Month',value:'month'}], state.gran, v=>{ state.gran=v; refreshSegs(); render(); });
     const views = ['trends','summary','bde','reco','alerts','focus','changes'];
     const viewIds = {trends:'trendsView', summary:'summaryView', bde:'bdeView', reco:'recoView', alerts:'alertsView', focus:'focusView', changes:'changesView'};
     buildSeg(document.getElementById('viewSeg'), [
