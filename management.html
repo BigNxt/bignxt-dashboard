@@ -495,7 +495,7 @@
   </div>
 
   <div id="bdeView" style="display:none;">
-    <div class="scope-note">A BDE&rsquo;s leads come almost entirely from one team already &mdash; Saudi-assigned BDEs work Saudi leads, Global-assigned BDEs work everyone else &mdash; so both teams are always shown side by side here, scoped only to the selected date range. Degree/University/Program/Channel/Country/Region/Entity filters above don&rsquo;t apply to this tab (BDE data isn&rsquo;t cross-tabbed with those). A handful of BDEs who&rsquo;ve left the team or only assign leads to others are excluded from this list entirely. <strong>Admissions here are CRM Admission Done status, not the Payment sheet</strong> (unlike the rest of the report) &mdash; the Payment sheet&rsquo;s BDE names don&rsquo;t reliably match the CRM&rsquo;s (first-name-only vs. full name, and a few names in one sheet don&rsquo;t appear in the other at all), so a per-BDE join would risk crediting the wrong person for their actual performance numbers. The Alerts tab&rsquo;s reconciliation card does attempt a conservative best-effort name match for its &ldquo;missing per BDE&rdquo; estimate specifically (falling back to &ldquo;no match&rdquo; rather than guessing on anything ambiguous) &mdash; that&rsquo;s a lower-stakes, clearly-labeled estimate meant to point at who to check, not a performance figure, which is why it&rsquo;s only used there and not here.</div>
+    <div class="scope-note">A BDE&rsquo;s leads come almost entirely from one team already &mdash; Saudi-assigned BDEs work Saudi leads, Global-assigned BDEs work everyone else &mdash; so both teams are always shown side by side here, scoped only to the selected date range. Degree/University/Program/Channel/Country/Region/Entity filters above don&rsquo;t apply to this tab (BDE data isn&rsquo;t cross-tabbed with those). A handful of BDEs who&rsquo;ve left the team or only assign leads to others are excluded from this list entirely. <strong>Admissions and Lead&rarr;Payment here are Payment-sheet sourced</strong>, same source of truth as the rest of the report &mdash; matched to a CRM owner by name (exact match, then whole-name-token match, then prefix match; an ambiguous name like a bare &ldquo;Allan&rdquo; against two different Allans is left unmatched rather than guessed). Leads, Untouched % and the Lead&rarr;stage funnel columns stay CRM-status-based (no Payment-sheet equivalent exists for pipeline-progress stages before payment). Two things this join can&rsquo;t fully resolve: a lead is scoped here by its <em>creation</em> date while the Payment sheet&rsquo;s month is the finance team&rsquo;s <em>payment</em> cycle, so a BDE&rsquo;s Lead&rarr;Payment rate can look unusually high or low if a lot of this period&rsquo;s payments belong to leads created in a different period; and a BDE&rsquo;s entire admissions total is shown under whichever team they mostly work (their one home entity), even for a payment tagged to the other entity. Any Payment-sheet admissions that can&rsquo;t be confidently matched to a current CRM owner are still counted in the tiles above (so the totals reconcile to the Payment sheet) but are called out separately in the note below the table rather than attributed to a specific BDE.</div>
     <div class="entity-split">
       <div class="entity-col is-global">
         <div class="entity-head"><span class="entity-dot"></span><h2>Global BDEs</h2></div>
@@ -512,7 +512,7 @@
               <th class="num" data-key="leadToApplication">Lead&rarr;App<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="meetingDoneToPayment">Mtg&nbsp;Done&rarr;Payment<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="won">Admissions<span class="arrow">&#9662;</span></th>
-              <th class="num" data-key="convRate">Lead&rarr;Admission<span class="arrow">&#9662;</span></th>
+              <th class="num" data-key="convRate">Lead&rarr;Payment<span class="arrow">&#9662;</span></th>
             </tr></thead>
             <tbody id="bdeBodyGlobal"></tbody>
           </table></div>
@@ -534,7 +534,7 @@
               <th class="num" data-key="leadToApplication">Lead&rarr;App<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="meetingDoneToPayment">Mtg&nbsp;Done&rarr;Payment<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="won">Admissions<span class="arrow">&#9662;</span></th>
-              <th class="num" data-key="convRate">Lead&rarr;Admission<span class="arrow">&#9662;</span></th>
+              <th class="num" data-key="convRate">Lead&rarr;Payment<span class="arrow">&#9662;</span></th>
             </tr></thead>
             <tbody id="bdeBodySaudi"></tbody>
           </table></div>
@@ -758,12 +758,13 @@
 
   <div class="card" style="margin-bottom:14px;">
     <h2>Campaign performance</h2>
-    <div class="chint">Every row respects the filters above. Click a column to sort. Ad-spend columns are blank where no matching Meta campaign was found (organic/offline sources, or spend not yet connected for that channel). <strong>Admissions, Conv.&nbsp;%, CAC, Fee Booked and ROI all come from the Payment sheet</strong> (matched by exact campaign name), not CRM Admission Done status &mdash; 0/blank where that campaign has no payment-sheet admissions yet, which is expected for most rows since most leads haven&rsquo;t reached admission. ROI = (Fee Booked &minus; Spend) / Spend. The Lead&rarr;stage % columns further right are a separate, CRM-status-based signal (pipeline progress, not verified admissions) and are unaffected.</div>
-    <div class="fgroup" style="margin-bottom:10px;">
+    <div class="chint">Every row respects the filters above. Click a column to sort. Ad-spend columns are blank where no matching Meta campaign was found (organic/offline sources, or spend not yet connected for that channel). <strong>Admissions, Conv.&nbsp;%, CAC, Fee Booked and ROI all come from the Payment sheet</strong> (matched by exact campaign name), not CRM Admission Done status &mdash; 0/blank where that campaign has no payment-sheet admissions yet, which is expected for most rows since most leads haven&rsquo;t reached admission. ROI = (Fee Booked &minus; Spend) / Spend. The Lead&rarr;stage % columns further right are a separate, CRM-status-based signal (pipeline progress, not verified admissions) and are unaffected. &ldquo;Download CSV&rdquo; exports every row matching the current filters/search/sort (not just the on-screen top 300).</div>
+    <div class="fgroup" style="margin-bottom:10px; justify-content:space-between;">
       <div class="search-wrap">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="campaignSearch" placeholder="Search campaign name&hellip;">
       </div>
+      <button type="button" id="downloadCampaignCsv" class="btn-primary">Download CSV</button>
     </div>
     <div class="tablewrap"><table id="campaignTable">
       <thead><tr>
@@ -798,22 +799,22 @@
   <footer class="notes">
     <h3>Methodology &amp; scope</h3>
     <ul>
-      <li><strong>Sources.</strong> CRM export <span class="num">Reports20260829085255.xlsx</span> (31,322 leads, Jan&ndash;Aug 2026) joined to ad spend (Supermetrics) across Meta (BIGNxt, BIG Academy KSA, BIUC), LinkedIn Ads (BIGNxt, BIG Academy KSA) and Google Ads (Big Academy) &mdash; all accounts bill in AED.</li>
+      <li><strong>Sources.</strong> CRM export <span class="num">Reports20260901032245.xlsx</span> (31,786 leads, Jan 1&ndash;Aug 31 2026) and the finance team&rsquo;s Payment sheet, joined to ad spend (Supermetrics, through Aug 31) across Meta (BIGNxt, BIG Academy KSA, BIUC), LinkedIn Ads (BIGNxt, BIG Academy KSA) and Google Ads (Big Academy) &mdash; all accounts bill in AED.</li>
       <li><strong>Entity split (Global vs Saudi).</strong> A lead is <em>Saudi</em> if its degree is Bachelor&rsquo;s (offered only at the Riyadh campus, so always routed to the Saudi team), or if its campaign name / country field references Saudi Arabia, Riyadh or Jeddah. Everything else is <em>Global</em>. Country free-text in the CRM is inconsistent (40+ spellings of &ldquo;Saudi Arabia&rdquo;), so campaign naming is treated as the primary signal.</li>
       <li><strong>Degree bucket.</strong> Derived from &ldquo;Level of study&rdquo; (CRM) or the campaign name (Ads): Bachelors/BBA/BSc &rarr; <em>Bachelor</em>; Masters/Executive Masters/MBA/DBA/Doctorate &rarr; <em>Masters</em>; certificates/diplomas/unlabeled &rarr; <em>Other</em>.</li>
       <li><strong>Funnel stages.</strong> The CRM &ldquo;Status&rdquo; field is a current snapshot, not a stage-entry log, so this funnel shows <em>where leads sit today</em>, not cohort conversion over time. Stages roll up as: New&nbsp;Lead &rarr; Working (Recontactable/Non&nbsp;Contactable/Call&nbsp;Back/Future&nbsp;follow&nbsp;up) &rarr; Qualified (Prospect/Hot&nbsp;Prospect) &rarr; Meeting&nbsp;Scheduled &rarr; Meeting&nbsp;Done &rarr; Application&nbsp;Filled &rarr; Admission&nbsp;Done. Not&nbsp;Interested/Not&nbsp;Eligible/Cold are tracked separately as Lost.</li>
       <li><strong>Campaign join.</strong> Ad spend is matched to CRM leads by exact campaign name, which recovers 94.5% of tracked ad spend across all three platforms (163 of 206 ad campaigns). Unmatched campaigns are usually traffic/awareness objectives that aren&rsquo;t expected to log CRM leads directly &mdash; <strong>except on Google Ads</strong>, where the match rate is unusually low (about 1% of Google spend matched): the CRM&rsquo;s recorded campaign value for Google traffic (e.g. &ldquo;RRU / Africa Search / 18/4/2026 / G&rdquo;) doesn&rsquo;t exactly match the real Google Ads campaign name (&ldquo;RRU / Africa / Search / 18/4/2026 / G&rdquo;) &mdash; likely a UTM-tagging mismatch on the Google side, unlike Meta/LinkedIn where the tagging lines up. Worth fixing at the source so Google spend joins correctly here.</li>
-      <li><strong>Stage-to-stage conversion.</strong> Because Status is a snapshot, &ldquo;reached a stage&rdquo; is approximated as leads currently sitting at that stage or any later one &mdash; a lead that reached Meeting Done and was later marked Lost is not counted as having reached it, so these rates are a floor, not exact cohort tracking. <strong>Hot Prospect is tracked as its own stage</strong>, separate from plain Prospect (previously folded together) &mdash; it&rsquo;s a higher-intent signal worth seeing on its own, sitting just after Qualified/Prospect in the funnel order; &ldquo;Lead &rarr; Prospect&rdquo; still includes Hot Prospect leads too (anyone who reached Prospect or later), while &ldquo;Lead &rarr; Hot Prospect&rdquo; isolates just the higher-intent subset. &ldquo;&hellip;&rarr; Payment&rdquo; figures (Meeting Done/Application &rarr; Payment, and the funnel chart&rsquo;s own Admission bar) are Payment-sheet sourced, not the CRM&rsquo;s Admission Done status &mdash; see the Admissions/ROI/Revenue note below.</li>
+      <li><strong>Stage-to-stage conversion.</strong> Because Status is a snapshot, &ldquo;reached a stage&rdquo; is approximated as leads currently sitting at that stage or any later one &mdash; a lead that reached Meeting Done and was later marked Lost is not counted as having reached it, so these rates are a floor, not exact cohort tracking. <strong>Hot Prospect is tracked as its own stage</strong>, separate from plain Prospect (previously folded together) &mdash; it&rsquo;s a higher-intent signal worth seeing on its own, sitting just after Qualified/Prospect in the funnel order; &ldquo;Lead &rarr; Prospect&rdquo; still includes Hot Prospect leads too (anyone who reached Prospect or later), while &ldquo;Lead &rarr; Hot Prospect&rdquo; isolates just the higher-intent subset. &ldquo;&hellip;&rarr; Payment&rdquo; figures (Meeting Done/Application &rarr; Payment, the standalone Lead &rarr; Payment rate, and the funnel chart&rsquo;s own Admission bar) are Payment-sheet sourced, not the CRM&rsquo;s Admission Done status &mdash; see the Admissions/ROI/Revenue note below.</li>
       <li><strong>Summary, BDE, Recommendations &amp; Focus Areas tabs are always entity-split.</strong> Global and Saudi run separate budgets/targets, so these tabs show Global and Saudi side by side rather than toggling between them; the top Entity control only scopes Trends and the campaign table. Degree/University/Program/Channel/Country/Region filters still narrow Summary/Recommendations (not BDE or Focus Areas&rsquo; region table, which aren&rsquo;t cross-tabbed with those).</li>
       <li><strong>Geography, Country &amp; Region filters.</strong> Geography is read primarily from the campaign&rsquo;s own target-country naming (more reliable than the CRM&rsquo;s free-text Country field), falling back to a normalized Country field for organic/offline leads. Saudi cities (Riyadh/Jeddah/Dammam/Medina) roll up into one Saudi Arabia row. The Region filter groups geographies into three named buckets &mdash; <em>Saudi</em> (Saudi Arabia only), <em>GCC</em> (Kuwait, UAE, Qatar, Oman, Bahrain &mdash; excludes Saudi, tracked separately), and <em>Africa</em> &mdash; countries outside all three (India, US, UK, etc.) are only reachable via the Country dropdown.</li>
       <li><strong>Date range.</strong> The date pickers filter to the exact day, down to individual leads/spend rows &mdash; not snapped to week or month boundaries. The Trends chart&rsquo;s x-axis bucketing (day/week/month) is chosen automatically from the width of the selected range (&le;13 days &rarr; daily points, &le;95 days &rarr; weekly, longer &rarr; monthly) &mdash; there&rsquo;s no separate grouping control to set.</li>
       <li><strong>University.</strong> CRM leads use the CRM&rsquo;s own University field first (normalized: e.g. &ldquo;Euclea Business School&rdquo; &rarr; Euclea), falling back to the campaign name&rsquo;s leading token (e.g. &ldquo;GEM / Masters In AI / Zambia / &hellip;&rdquo; &rarr; GEM) when that field is blank (&sim;27% of leads) &mdash; the same convention Geography classification already relies on. Ad spend has no University field at all, so it&rsquo;s always resolved from the campaign name. Recognized: GEM, RRU, EU Global (campaign token &ldquo;EUG&rdquo;), Euclea (all BSc campaigns &mdash; the Bachelor&rsquo;s partner), AIU, Grenoble, BIUC, NAL Academy; anything else is &ldquo;Other/Unspecified&rdquo;.</li>
       <li><strong>Program (specialization).</strong> Keyword-bucketed from the CRM&rsquo;s free-text Course field (huge spelling variance, e.g. &ldquo;Master in Artificial Intelligence &amp; Applied Data Science&rdquo; and &ldquo;BSc in Artificial Intelligence&rdquo; both bucket to &ldquo;AI &amp; Data Science&rdquo;), falling back to the campaign name text when Course is blank or for ad spend rows. Buckets: AI &amp; Data Science, Fintech, Cybersecurity, MBA / Business Administration (the catch-all for general/international/global business, health economics, financial management, accounting, leadership, hospitality), Project Management, Logistics &amp; Supply Chain, Digital Marketing, DBA, Other/Unspecified.</li>
-      <li><strong>Admissions, ROI &amp; the Payment sheet.</strong> A separately-maintained finance sheet (Course Fee Booked, Payment Received, Admission Date, BDE, Campaign, University, Specialisation, Course, Country, Primary Source per admitted student) is the authoritative source for <strong>every &ldquo;Admissions&rdquo;/Conv.&nbsp;%/CAC figure in this report</strong> (Summary, campaign table, Recommendations, Focus Areas), not CRM Admission Done status &mdash; the CRM status can lag or be missed entirely, which is exactly why this sheet exists and why the Alerts tab tracks the gap between the two. The two exceptions are the Summary tab&rsquo;s own funnel chart (deliberately left as a CRM-status snapshot &mdash; see its own hint) and BDE Performance (see that tab&rsquo;s note on why a per-BDE join isn&rsquo;t reliable). Degree/Channel/Geography for Payment-sheet rows are derived the same way as CRM&rsquo;s (Course field &rarr; Degree, Primary Source &rarr; Channel, Country &rarr; Geography), so every filter in the top bar narrows Payment-sheet figures exactly like CRM ones. Course Fee Booked is standardized to AED (AED and SAR are both fixed USD pegs &mdash; 3.6725 and 3.75 respectively &mdash; so a constant conversion is exact, not approximate, for the whole window; a missing currency tag defaults to the entity&rsquo;s dominant currency, SAR for Saudi / USD for Global). <strong>ROI = (Fee Booked &minus; Ad Spend) / Ad Spend</strong>, joined to campaigns by exact name match. Payment Received tracks a separate, much smaller figure (the deposit collected so far, not full tuition) and isn&rsquo;t part of the ROI calculation, per instruction. <strong>Month/cycle labels</strong> (e.g. &ldquo;2026-08&rdquo;) are the finance team&rsquo;s own payment cycle, 6th of the month to 5th of the next &mdash; the &ldquo;August&rdquo; cycle covers 6 Aug&ndash;5 Sep, not the calendar month; the sheet is only cycle-granular (no exact payment date), so a Payment-sheet figure is included whenever its cycle overlaps the selected date range at all. A handful of rows (flagged separately, excluded from all fee/ROI totals) have a Fee Booked value that reads as a payment-method note rather than an amount &mdash; a data-entry issue in the source sheet, not a dashboard bug.</li>
+      <li><strong>Admissions, ROI &amp; the Payment sheet.</strong> A separately-maintained finance sheet (Course Fee Booked, Payment Received, Admission Date, BDE, Campaign, University, Specialisation, Course, Country, Primary Source per admitted student) is the <strong>sole source of truth for every &ldquo;Admissions&rdquo;/payment figure in this report</strong> (Trends, Summary, campaign table, Recommendations, Focus Areas, BDE Performance, and the Summary funnel chart&rsquo;s own Admission bar) &mdash; CRM Admission Done status is not used anywhere for this figure, since a CRM lead can be created in one date-filter window and pay in a later one and the Payment sheet is the finance-verified record either way. On BDE Performance specifically, Payment-sheet admissions are matched to a CRM owner by name (exact/whole-token/prefix match, falling back to unmatched rather than guessing on anything ambiguous like a bare &ldquo;Allan&rdquo;) &mdash; see that tab&rsquo;s own note for how unmatched amounts are still counted in the totals without being credited to a specific person. Degree/Channel/Geography for Payment-sheet rows are derived the same way as CRM&rsquo;s (Course field &rarr; Degree, Primary Source &rarr; Channel, Country &rarr; Geography), so every filter in the top bar narrows Payment-sheet figures exactly like CRM ones. Course Fee Booked is standardized to AED (AED and SAR are both fixed USD pegs &mdash; 3.6725 and 3.75 respectively &mdash; so a constant conversion is exact, not approximate, for the whole window; a missing currency tag defaults to the entity&rsquo;s dominant currency, SAR for Saudi / USD for Global). <strong>ROI = (Fee Booked &minus; Ad Spend) / Ad Spend</strong>, joined to campaigns by exact name match; <strong>ROAS = Fee Booked / Ad Spend</strong>. Payment Received tracks a separate, much smaller figure (the deposit collected so far, not full tuition) and isn&rsquo;t part of the ROI/ROAS calculation, per instruction. <strong>Month/cycle labels</strong> (e.g. &ldquo;2026-08&rdquo;) are the finance team&rsquo;s own payment cycle, 6th of the month to 5th of the next &mdash; the &ldquo;August&rdquo; cycle covers 6 Aug&ndash;5 Sep, not the calendar month; the sheet is only cycle-granular (no exact payment date), so a Payment-sheet figure is included whenever its cycle overlaps the selected date range at all. A handful of rows (flagged separately, excluded from all fee/ROI totals) have a Fee Booked value that reads as a payment-method note rather than an amount &mdash; a data-entry issue in the source sheet, not a dashboard bug.</li>
       <li><strong>Platform-detected changes (Track Changes tab).</strong> Pulled from Meta and Google Ads&rsquo; own change-history APIs (Facebook Ads Manager&rsquo;s Activity Log / Google Ads&rsquo; Change History), account-wide, then filtered to changes a person actually made &mdash; automated ad-review status churn, delivery pings, user-role admin, and generic asset-library uploads are excluded. Both platforms only retain a rolling <strong>~2&ndash;3 week</strong> change history, not the full campaign lifetime, so this list can never reach back to January even though the rest of the dashboard does &mdash; it will simply cover a little more history each time the dashboard is refreshed. LinkedIn Ads has no change-history API at all, so LinkedIn changes always need the manual log. Each auto-detected change gets the same automatic before/after impact statement as a manually-logged one.</li>
-      <li><strong>BDE performance.</strong> One row per CRM &ldquo;Lead owner.&rdquo; &ldquo;Untouched %&rdquo; is the share of a BDE&rsquo;s leads still sitting in an Untouched/Not-enquired sub-status &mdash; a proxy for leads that were never worked, independent of lead quality. Rows are flagged when lead&rarr;admission conversion falls below 60% of their own team&rsquo;s median, restricted to BDEs with at least 10 leads so small books don&rsquo;t get flagged on noise. BDEs who&rsquo;ve left the team or only assign leads to others (not work them) are excluded from tracking entirely, by name.</li>
+      <li><strong>BDE performance.</strong> One row per CRM &ldquo;Lead owner,&rdquo; leads/Untouched %/Lead&rarr;stage columns from CRM; Admissions and Lead&rarr;Payment are Payment-sheet sourced via a best-effort BDE-name match (see this tab&rsquo;s own scope-note above for how). &ldquo;Untouched %&rdquo; is the share of a BDE&rsquo;s leads still sitting in an Untouched/Not-enquired sub-status &mdash; a proxy for leads that were never worked, independent of lead quality. Rows are flagged when Lead&rarr;Payment falls below 60% of their own team&rsquo;s median, restricted to BDEs with at least 10 leads so small books don&rsquo;t get flagged on noise. BDEs who&rsquo;ve left the team or only assign leads to others (not work them) are excluded from tracking entirely, by name.</li>
       <li><strong>Recommendations tab.</strong> Campaigns/geography/channels are scored within their own team by comparing conversion rate and CAC against that team&rsquo;s own median &mdash; <em>Scale</em> (better than median on both, real volume already), <em>Optimize</em> (mixed signals, or acceptable conversion but weak CAC or vice versa), <em>Pause</em> (worse than median on both, with real spend already committed), <em>Insufficient data</em> (under 20 leads and little spend &mdash; too early to call). This is a heuristic ranking, not a budget-allocation model &mdash; use it to prioritize where to look, not as the final word.</li>
-      <li><strong>Alerts tab.</strong> Three independent checks: (1) <em>Lead-flow breakage</em> compares the ad platform&rsquo;s own on-platform lead count per campaign against what actually landed in the CRM for the whole selected range &mdash; a large, consistent gap points at a tracking/sync problem, not a marketing one (Google Ads is excluded from this specific check for a separately-documented reason, see Campaign join above). (2) <em>BDE performance drop</em> and (3) <em>Campaign trend degradation</em> split the selected date range exactly in half by day and compare each BDE&rsquo;s or campaign&rsquo;s own second half against its own first half &mdash; make the range wide enough (e.g. 4+ weeks) for both halves to hold a meaningful sample. None of this is available at ad-set/ad/placement level yet since that granularity hasn&rsquo;t been pulled from Supermetrics.</li>
+      <li><strong>Alerts tab.</strong> Three independent checks: (1) <em>Lead-flow breakage</em> compares the ad platform&rsquo;s own on-platform lead count per campaign against what actually landed in the CRM for the whole selected range &mdash; a large, consistent gap points at a tracking/sync problem, not a marketing one (Google Ads is excluded from this specific check for a separately-documented reason, see Campaign join above). (2) <em>BDE performance drop</em> and (3) <em>Campaign trend degradation</em> split the selected date range exactly in half by day and compare each BDE&rsquo;s or campaign&rsquo;s own second half against its own first half &mdash; make the range wide enough (e.g. 4+ weeks) for both halves to hold a meaningful sample. These two specifically still read CRM Admission Done status rather than the Payment sheet, deliberately: they need a day-by-day split within the selected range to compare halves, and the Payment sheet is only ever cycle-month granular, so it can&rsquo;t support that split at all &mdash; they&rsquo;re an early-warning trend signal, not the report&rsquo;s admissions figure. None of this is available at ad-set/ad/placement level yet since that granularity hasn&rsquo;t been pulled from Supermetrics.</li>
       <li><strong>Focus Areas tab.</strong> Narrative pointers generated from the exact same computations as Recommendations and Alerts (trend degradation, Pause/Scale calls, lead-flow gaps, BDE drops), reframed as prioritized headlines instead of raw tables, plus a region-level comparison (Saudi / GCC / Africa). It cannot yet speak to ad-set, creative, or placement-level performance (e.g. creative fatigue) &mdash; that would need those dimensions pulled from Supermetrics, which today&rsquo;s campaign-level data doesn&rsquo;t include.</li>
       <li><strong>Track Changes tab.</strong> A manually-logged change history, saved in this browser&rsquo;s local storage only &mdash; it does not sync across devices and is not shared between the Claude-hosted link and any other copy of this dashboard. Before/after metrics for each entry are computed automatically from the 14 days immediately before vs. after the logged date, scoped to the campaign/entity specified. The &ldquo;Needs a logged response&rdquo; panel cross-references currently-active Alerts against the log and surfaces anything from the last 30 days with no matching entry &mdash; it flags an absence of a logged response, not that nothing was actually done.</li>
     </ul>
@@ -1120,7 +1121,8 @@ function funnelConversions(rows, admissionOverride){
     {label:'Lead &rarr; Application', num:applied, den:totalLeads, pct:rate(applied, totalLeads)},
     {label:'Meeting Done &rarr; Application', num:applied, den:meetingDone, pct:rate(applied, meetingDone)},
     {label:'Meeting Done &rarr; Payment', num:admitted, den:meetingDone, pct:rate(admitted, meetingDone)},
-    {label:'Application &rarr; Payment', num:admitted, den:applied, pct:rate(admitted, applied)}
+    {label:'Application &rarr; Payment', num:admitted, den:applied, pct:rate(admitted, applied)},
+    {label:'Lead &rarr; Payment', num:admitted, den:totalLeads, pct:rate(admitted, totalLeads)}
   ];
 }
 
@@ -1556,6 +1558,11 @@ function renderKpis(filteredCRM, filteredAds, periods){
 }
 
 /* ---------------- table ---------------- */
+// Holds the exact rows/order the campaign table is currently showing (post search+sort, pre the
+// 300-row display cap) so the CSV download can export "everything you're currently looking at",
+// not just the on-screen preview.
+let lastCampaignRows = [];
+
 function renderTable(rows){
   const tbody = document.getElementById('campaignBody');
   const search = state.search.trim().toLowerCase();
@@ -1568,6 +1575,7 @@ function renderTable(rows){
     if(typeof av === 'string') return av.localeCompare(bv)*dir;
     return (av-bv)*dir;
   });
+  lastCampaignRows = filtered;
   const total = filtered.length;
   const shown = filtered.slice(0,300);
   const pctOrDash = v => v!=null ? fmtPct(v) : '<span class="dash">'+EMDASH+'</span>';
@@ -1604,6 +1612,61 @@ function renderTable(rows){
     th.classList.toggle('sorted', th.dataset.key===state.sortKey);
     th.querySelector('.arrow').innerHTML = th.dataset.key===state.sortKey ? (state.sortDir==='asc'?'&#9652;':'&#9662;') : '&#9662;';
   });
+}
+
+function csvEscape(v){
+  if(v==null) return '';
+  const s = String(v);
+  return /[",\r\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+}
+function round2(v){ return v==null ? null : Math.round(v*100)/100; }
+
+// Exports exactly what the Campaign performance table is currently showing - same search text and
+// sort order, but every matching row (not just the on-screen top-300 cap). Percent/money columns
+// are exported as plain numbers (not "12.3%"/"AED 1,234" strings) so a spreadsheet can sum/chart
+// them directly rather than needing to be re-parsed first.
+async function downloadCampaignCsv(){
+  const headers = ['Campaign','Entity','Degree','Channel','Geography','Leads','Admissions','Conv. %',
+    'Spend (AED)','Impr.','Clicks','CPL','CAC','Fee Booked (AED)','ROI %',
+    'Lead to Prospect %','Lead to Hot Prospect %','Lead to Meeting Done %','Lead to Application %',
+    'Meeting Done to Application %','Meeting Done to Payment %','Application to Payment %'];
+  const lines = [headers.map(csvEscape).join(',')];
+  lastCampaignRows.forEach(r=>{
+    lines.push([
+      r.campaign, r.entity, r.degree, r.channel, r.geo,
+      r.leads, r.won, round2(r.convRate),
+      round2(r.cost), r.impressions, r.clicks, round2(r.cpl), round2(r.cac),
+      round2(r.feeAED), round2(r.roi),
+      round2(r.leadToProspect), round2(r.leadToHotProspect), round2(r.leadToMeetingDone), round2(r.leadToApplication),
+      round2(r.meetingDoneToApplication), round2(r.meetingDoneToPayment), round2(r.applicationToPayment)
+    ].map(csvEscape).join(','));
+  });
+  const csvText = String.fromCharCode(0xFEFF) + lines.join('\r\n');
+  const filename = `bignxt-campaign-metrics_${state.dateFrom}_to_${state.dateTo}.csv`;
+
+  // The Claude-hosted copy of this dashboard runs inside a sandboxed viewer that silently blocks
+  // a plain <a download> click - the `downloads` capability's save() is the only way to hand the
+  // viewer a file there. The GitHub Pages copy is a normal static page with no such sandbox, where
+  // window.claude doesn't exist at all, so it falls straight to the plain browser download below.
+  // Never mix the two: only fall back when the capability itself is absent, not when the viewer
+  // declines the save prompt (that's their own choice, not a reason to try a different method).
+  if(window.claude && typeof window.claude.use === 'function'){
+    let downloads = null;
+    try{ downloads = await window.claude.use('downloads'); }catch(e){}
+    if(downloads){
+      try{ await downloads.save({filename, data: csvText}); }catch(e){}
+      return;
+    }
+  }
+  const blob = new Blob([csvText], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 /* ---------------- main render ---------------- */
@@ -1733,21 +1796,26 @@ function median(nums){
   return s.length%2 ? s[mid] : (s[mid-1]+s[mid])/2;
 }
 
-function bdeLeaderboard(rows){
+// paymentByOwner (from computePaymentAdmissionsByOwner) supplies Admissions/Conv. rate - Payment
+// sheet is the sole source of truth for admissions everywhere in this report now, including here.
+// leads/untouched/the Lead-to-stage funnel columns stay CRM-status-based (no Payment-sheet
+// equivalent exists for pipeline-progress stages before Admission).
+function bdeLeaderboard(rows, paymentByOwner){
   const map = new Map();
   for(const r of rows){
     let o = map.get(r.owner);
-    if(!o){ o = {owner:r.owner, leads:0, won:0, untouched:0, rows:[]}; map.set(r.owner,o); }
-    o.leads += r.leads; o.won += r.won; o.untouched += r.untouched; o.rows.push(r);
+    if(!o){ o = {owner:r.owner, leads:0, untouched:0, rows:[]}; map.set(r.owner,o); }
+    o.leads += r.leads; o.untouched += r.untouched; o.rows.push(r);
   }
   const list = Array.from(map.values()).map(o=>{
     const conv = funnelConversions(o.rows);
+    const won = paymentByOwner.get(o.owner) || 0;
     return {
-      owner:o.owner, leads:o.leads, won:o.won,
+      owner:o.owner, leads:o.leads, won,
       untouchedPct: o.leads>0 ? o.untouched/o.leads*100 : null,
       leadToProspect: conv[0].pct, leadToHotProspect: conv[1].pct, leadToMeetingDone: conv[2].pct, leadToApplication: conv[3].pct,
       meetingDoneToPayment: conv[5].pct,
-      convRate: o.leads>0 ? o.won/o.leads*100 : null
+      convRate: o.leads>0 ? won/o.leads*100 : null
     };
   });
   const convValues = list.filter(o=>o.leads>=10 && o.convRate!=null).map(o=>o.convRate);
@@ -1804,13 +1872,66 @@ const OWNER_PRIMARY_ENTITY = (function(){
   return map;
 })();
 
-function renderBdeEntityPanel(entityValue, sortState){
+const ALL_BDE_OWNERS = Array.from(new Set(ALL_BDE.map(r=>r.owner)));
+
+// Best-effort match of the Payment sheet's often first-name-only BDE spelling to a CRM owner in
+// the active roster. Conservative on purpose: exact match, then whole-token match (the payment
+// name equals one whole word of the CRM name, in any position - catches "Fazal" inside "Muhammed
+// Fazal Tk"), then a same-direction prefix match with a length-4 floor (catches concatenated/short
+// forms like "Deepak" -> "DeepakCM"). More than one equally-good match (e.g. bare "Allan" against
+// both "Allan Daniel" and "Allan Suresh") is treated as unmatched rather than guessed - a wrong
+// guess here would misattribute a real admission to the wrong person's performance number.
+function matchPaymentBdeToOwner(paymentBde, ownerList){
+  const p = (paymentBde||'').trim().toLowerCase();
+  if(!p) return null;
+  const exact = ownerList.filter(o=>o.toLowerCase()===p);
+  if(exact.length===1) return exact[0];
+  const tokenMatches = ownerList.filter(o=>o.toLowerCase().split(/\s+/).includes(p));
+  if(tokenMatches.length===1) return tokenMatches[0];
+  if(p.length>=4){
+    const prefixMatches = ownerList.filter(o=>{
+      const ol = o.toLowerCase();
+      return ol.startsWith(p) || p.startsWith(ol);
+    });
+    if(prefixMatches.length===1) return prefixMatches[0];
+  }
+  return null;
+}
+
+// Payment sheet is the sole source of truth for admissions everywhere in this report, including
+// per-BDE - computed once per render (both entity panels share it) since it doesn't depend on
+// which panel is being drawn, only on the selected date range. Matched admissions are keyed by the
+// CRM owner name so bdeLeaderboard() can attach them to the right leaderboard row; anything that
+// can't be confidently matched is kept separate (by the payment row's own entity tag, the only
+// signal available for it) so the per-entity total still reconciles to the Payment sheet's true
+// number without silently crediting a guessed BDE.
+function computePaymentAdmissionsByOwner(){
+  const rangePayments = ALL_PAYMENTS.filter(paymentMatchesDate);
+  const byOwner = new Map();
+  const unmatched = {Global:0, Saudi:0};
+  const unmatchedNames = {Global:new Map(), Saudi:new Map()};
+  for(const r of rangePayments){
+    const owner = matchPaymentBdeToOwner(r.bde, ALL_BDE_OWNERS);
+    if(owner){
+      byOwner.set(owner, (byOwner.get(owner)||0) + r.admissions);
+    } else {
+      const ent = r.entity==='Saudi' ? 'Saudi' : 'Global';
+      unmatched[ent] += r.admissions;
+      const m = unmatchedNames[ent];
+      m.set(r.bde, (m.get(r.bde)||0) + r.admissions);
+    }
+  }
+  return {byOwner, unmatched, unmatchedNames};
+}
+
+function renderBdeEntityPanel(entityValue, sortState, paymentAdm){
   const rangeBde = ALL_BDE.filter(r => OWNER_PRIMARY_ENTITY[r.owner]===entityValue && matchesDate(r));
-  const {list, median:med} = bdeLeaderboard(rangeBde);
+  const {list, median:med} = bdeLeaderboard(rangeBde, paymentAdm.byOwner);
 
   const totalLeads = list.reduce((s,o)=>s+o.leads,0);
-  const totalWon = list.reduce((s,o)=>s+o.won,0);
-  const totalUntouched = rangeBde.reduce((s,r)=>s+r.untouched,0);
+  const totalWonMatched = list.reduce((s,o)=>s+o.won,0);
+  const unmatchedAmt = paymentAdm.unmatched[entityValue] || 0;
+  const totalWon = totalWonMatched + unmatchedAmt;
   const tiles = [
     {label:'BDEs active', value:fmtInt(list.filter(o=>o.leads>0).length)},
     {label:'Total leads', value:fmtInt(totalLeads)},
@@ -1836,15 +1957,22 @@ function renderBdeEntityPanel(entityValue, sortState){
       <td class="num">${pctOrDash(o.convRate)}</td>
     </tr>`).join('') || '<tr><td colspan="10" class="empty-state">No BDE data for this selection.</td></tr>';
 
-  document.getElementById('bdeFoot'+entityValue).textContent =
-    med!=null ? `${sorted.length} BDEs. Median lead-to-admission conversion: ${med.toFixed(1)}% (flag threshold: below ${(med*0.6).toFixed(1)}%, among BDEs with 10+ leads).` : `${sorted.length} BDEs.`;
+  let footText = med!=null
+    ? `${sorted.length} BDEs. Median lead-to-admission conversion: ${med.toFixed(1)}% (flag threshold: below ${(med*0.6).toFixed(1)}%, among BDEs with 10+ leads).`
+    : `${sorted.length} BDEs.`;
+  if(unmatchedAmt>0){
+    const names = Array.from(paymentAdm.unmatchedNames[entityValue].keys()).join(', ');
+    footText += ` ${fmtInt(unmatchedAmt)} admission${unmatchedAmt===1?'':'s'} from Payment-sheet BDE name${unmatchedAmt===1?'':'s'} not confidently matched to a current CRM owner (${names}) ${unmatchedAmt===1?'is':'are'} included in the tiles above but not attributed to a specific row below.`;
+  }
+  document.getElementById('bdeFoot'+entityValue).textContent = footText;
 
   updateSortArrows('bdeTable'+entityValue, sortState);
 }
 
 function renderBde(){
-  renderBdeEntityPanel('Global', bdeStateGlobal);
-  renderBdeEntityPanel('Saudi', bdeStateSaudi);
+  const paymentAdm = computePaymentAdmissionsByOwner();
+  renderBdeEntityPanel('Global', bdeStateGlobal, paymentAdm);
+  renderBdeEntityPanel('Saudi', bdeStateSaudi, paymentAdm);
 }
 
 /* ---------------- recommendations (scale / optimize / pause) ---------------- */
@@ -2716,6 +2844,7 @@ function init(){
   rebuildQuickSeg();
 
   document.getElementById('campaignSearch').addEventListener('input', (e)=>{ state.search=e.target.value; renderTable(campaignTable(ALL_CRM.filter(matches), ALL_ADS.filter(matches))); });
+  document.getElementById('downloadCampaignCsv').addEventListener('click', downloadCampaignCsv);
 
   document.querySelectorAll('#campaignTable thead th').forEach(th=>{
     th.addEventListener('click', ()=>{
