@@ -804,7 +804,7 @@
       <li><strong>Degree bucket.</strong> Derived from &ldquo;Level of study&rdquo; (CRM) or the campaign name (Ads): Bachelors/BBA/BSc &rarr; <em>Bachelor</em>; Masters/Executive Masters/MBA/DBA/Doctorate &rarr; <em>Masters</em>; certificates/diplomas/unlabeled &rarr; <em>Other</em>.</li>
       <li><strong>Funnel stages.</strong> The CRM &ldquo;Status&rdquo; field is a current snapshot, not a stage-entry log, so this funnel shows <em>where leads sit today</em>, not cohort conversion over time. Stages roll up as: New&nbsp;Lead &rarr; Working (Recontactable/Non&nbsp;Contactable/Call&nbsp;Back/Future&nbsp;follow&nbsp;up) &rarr; Qualified (Prospect/Hot&nbsp;Prospect) &rarr; Meeting&nbsp;Scheduled &rarr; Meeting&nbsp;Done &rarr; Application&nbsp;Filled &rarr; Admission&nbsp;Done. Not&nbsp;Interested/Not&nbsp;Eligible/Cold are tracked separately as Lost.</li>
       <li><strong>Campaign join.</strong> Ad spend is matched to CRM leads by exact campaign name, which recovers 94.5% of tracked ad spend across all three platforms (163 of 206 ad campaigns). Unmatched campaigns are usually traffic/awareness objectives that aren&rsquo;t expected to log CRM leads directly &mdash; <strong>except on Google Ads</strong>, where the match rate is unusually low (about 1% of Google spend matched): the CRM&rsquo;s recorded campaign value for Google traffic (e.g. &ldquo;RRU / Africa Search / 18/4/2026 / G&rdquo;) doesn&rsquo;t exactly match the real Google Ads campaign name (&ldquo;RRU / Africa / Search / 18/4/2026 / G&rdquo;) &mdash; likely a UTM-tagging mismatch on the Google side, unlike Meta/LinkedIn where the tagging lines up. Worth fixing at the source so Google spend joins correctly here.</li>
-      <li><strong>Stage-to-stage conversion.</strong> Because Status is a snapshot, &ldquo;reached a stage&rdquo; is approximated as leads currently sitting at that stage or any later one &mdash; a lead that reached Meeting Done and was later marked Lost is not counted as having reached it, so these rates are a floor, not exact cohort tracking. <strong>Hot Prospect is tracked as its own stage</strong>, separate from plain Prospect (previously folded together) &mdash; it&rsquo;s a higher-intent signal worth seeing on its own, sitting just after Qualified/Prospect in the funnel order; &ldquo;Lead &rarr; Prospect&rdquo; still includes Hot Prospect leads too (anyone who reached Prospect or later), while &ldquo;Lead &rarr; Hot Prospect&rdquo; isolates just the higher-intent subset. &ldquo;&hellip;&rarr; Payment&rdquo; figures (Meeting Done/Application &rarr; Payment, the standalone Lead &rarr; Payment rate, and the funnel chart&rsquo;s own Admission bar) are Payment-sheet sourced, not the CRM&rsquo;s Admission Done status &mdash; see the Admissions/ROI/Revenue note below.</li>
+      <li><strong>Stage-to-stage conversion.</strong> Most of these rates measure &ldquo;reached a stage or any later one&rdquo; (a lead that reached Meeting Done and was later marked Lost still counts as having reached it) &mdash; a floor, not exact cohort tracking, since Status is a snapshot with no history log. <strong>Lead &rarr; Prospect and Lead &rarr; Hot Prospect are the one exception: they count leads sitting in that exact status right now</strong>, not cumulatively through later stages &mdash; deliberately, since Prospect/Hot Prospect are subjective intent tags a BDE applies to a still-working lead, not a required workflow gate, so a lead very often moves straight to Meeting Scheduled or Application Filled without ever being tagged Hot Prospect along the way; counting those as &ldquo;reached Hot Prospect&rdquo; measurably overstated it (verified against a BDE&rsquo;s own CRM status filter: this dashboard read 2.3%, the CRM&rsquo;s own count was 0.1%). These two rows show percentage only, not a fraction, for the same reason &mdash; the underlying count is a shifting snapshot (leads sitting there today can move to any other stage tomorrow), not a stable cohort size worth quoting as a raw number. &ldquo;&hellip;&rarr; Payment&rdquo; figures (Meeting Done/Application &rarr; Payment, the standalone Lead &rarr; Payment rate, and the funnel chart&rsquo;s own Admission bar) are Payment-sheet sourced, not the CRM&rsquo;s Admission Done status &mdash; see the Admissions/ROI/Revenue note below.</li>
       <li><strong>Summary, BDE, Recommendations &amp; Focus Areas tabs are always entity-split.</strong> Global and Saudi run separate budgets/targets, so these tabs show Global and Saudi side by side rather than toggling between them; the top Entity control only scopes Trends and the campaign table. Degree/University/Program/Channel/Country/Region filters still narrow Summary/Recommendations (not BDE or Focus Areas&rsquo; region table, which aren&rsquo;t cross-tabbed with those).</li>
       <li><strong>Geography, Country &amp; Region filters.</strong> Geography is read primarily from the campaign&rsquo;s own target-country naming (more reliable than the CRM&rsquo;s free-text Country field), falling back to a normalized Country field for organic/offline leads. Saudi cities (Riyadh/Jeddah/Dammam/Medina) roll up into one Saudi Arabia row. The Region filter groups geographies into three named buckets &mdash; <em>Saudi</em> (Saudi Arabia only), <em>GCC</em> (Kuwait, UAE, Qatar, Oman, Bahrain &mdash; excludes Saudi, tracked separately), and <em>Africa</em> &mdash; countries outside all three (India, US, UK, etc.) are only reachable via the Country dropdown.</li>
       <li><strong>Date range.</strong> The date pickers filter to the exact day, down to individual leads/spend rows &mdash; not snapped to week or month boundaries. The Trends chart&rsquo;s x-axis bucketing (day/week/month) is chosen automatically from the width of the selected range (&le;13 days &rarr; daily points, &le;95 days &rarr; weekly, longer &rarr; monthly) &mdash; there&rsquo;s no separate grouping control to set.</li>
@@ -1107,16 +1107,26 @@ function cumulativeFunnel(rows, admissionOverride){
 
 function funnelConversions(rows, admissionOverride){
   const totalLeads = rows.reduce((s,r)=>s+r.leads,0);
-  const {cum} = cumulativeFunnel(rows, admissionOverride);
-  const qualified = cum['Qualified']||0;
-  const hotProspect = cum['Hot Prospect']||0;
+  const {counts, cum} = cumulativeFunnel(rows, admissionOverride);
+  // Prospect and Hot Prospect deliberately use the RAW (current-status) count, not the cumulative
+  // "reached this stage or later" count used for every stage below - matches how the CRM's own
+  // status filter counts them today (a leads-on-hand snapshot, so you know how many are sitting in
+  // that stage right now and might still convert), not "how many ever passed through here". This
+  // matters because, unlike Meeting Done/Application/Admission (real sequential workflow gates a
+  // lead must pass through), Prospect/Hot Prospect are subjective BDE-applied intent tags - a lead
+  // routinely jumps straight from Working to Meeting Scheduled or Application Filled without ever
+  // being tagged Hot Prospect along the way, so treating "currently Application Filled" as "passed
+  // through Hot Prospect" measurably inflates the figure (confirmed against a real BDE's CRM
+  // filter: cumulative read 2.3%, current-status read 0.1%, matching the CRM's own count exactly).
+  const qualified = counts['Qualified']||0;
+  const hotProspect = counts['Hot Prospect']||0;
   const meetingDone = cum['Meeting Done']||0;
   const applied = cum['Application Filled']||0;
   const admitted = cum['Admission']||0;
   const rate = (num, den) => den>0 ? num/den*100 : null;
   return [
-    {label:'Lead &rarr; Prospect', num:qualified, den:totalLeads, pct:rate(qualified, totalLeads)},
-    {label:'Lead &rarr; Hot Prospect', num:hotProspect, den:totalLeads, pct:rate(hotProspect, totalLeads)},
+    {label:'Lead &rarr; Prospect', num:qualified, den:totalLeads, pct:rate(qualified, totalLeads), snapshot:true},
+    {label:'Lead &rarr; Hot Prospect', num:hotProspect, den:totalLeads, pct:rate(hotProspect, totalLeads), snapshot:true},
     {label:'Lead &rarr; Meeting Done', num:meetingDone, den:totalLeads, pct:rate(meetingDone, totalLeads)},
     {label:'Lead &rarr; Application', num:applied, den:totalLeads, pct:rate(applied, totalLeads)},
     {label:'Meeting Done &rarr; Application', num:applied, den:meetingDone, pct:rate(applied, meetingDone)},
@@ -1261,7 +1271,7 @@ function renderFunnelConv(container, conversions){
       <div class="conv-label">${c.label}</div>
       <div class="conv-bar-wrap"><div class="conv-bar-track"><div class="conv-bar-fill" style="width:${c.pct!=null?Math.min(100,c.pct).toFixed(1):0}%"></div></div></div>
       <div class="conv-val num">${c.pct!=null?c.pct.toFixed(1)+'%':EMDASH}</div>
-      <div class="conv-frac num">${fmtInt(c.num)} / ${fmtInt(c.den)}</div>
+      <div class="conv-frac num">${c.snapshot?'':fmtInt(c.num)+' / '+fmtInt(c.den)}</div>
     </div>`).join('');
 }
 
@@ -1430,10 +1440,18 @@ function renderFunnel(container, counts){
   container.innerHTML = '';
   const maxV = Math.max(1, ...FUNNEL_ORDER.map(k=>counts[k]||0));
   const topOfFunnel = counts['New']||0;
-  const total = FUNNEL_ORDER.reduce((s,k)=>s+(counts[k]||0),0);
+  const lost = counts.Lost||0;
+  // Every row's percentage - each funnel stage AND Lost - is a share of ALL leads in the current
+  // filter, the same denominator funnelConversions() uses for Lead -> Prospect/Hot Prospect/etc
+  // just below this chart, so every number on this tab is directly comparable and the rows sum to
+  // exactly 100%. Previously each stage divided only by the non-Lost total while Lost divided by
+  // everything - two different denominators shown side by side, which is exactly the kind of
+  // inconsistency that made Hot Prospect look "wrong" once it was compared against a different
+  // percentage of the same underlying count elsewhere in the dashboard.
+  const totalAll = FUNNEL_ORDER.reduce((s,k)=>s+(counts[k]||0),0) + lost;
   FUNNEL_ORDER.forEach((stage,i)=>{
     const v = counts[stage]||0;
-    const pct = total>0 ? (v/total*100) : 0;
+    const pct = totalAll>0 ? (v/totalAll*100) : 0;
     const widthPct = (v/maxV*100).toFixed(1);
     const isWon = stage==='Admission';
     const row = document.createElement('div'); row.className='funnel-row';
@@ -1443,8 +1461,7 @@ function renderFunnel(container, counts){
       <div class="funnel-val"><span class="n num">${fmtInt(v)}</span><span class="p num">${pct.toFixed(1)}%</span></div>`;
     container.appendChild(row);
   });
-  const lost = counts.Lost||0;
-  const lostPct = (total+lost)>0 ? (lost/(total+lost)*100) : 0;
+  const lostPct = totalAll>0 ? (lost/totalAll*100) : 0;
   const lostRow = document.createElement('div'); lostRow.className='funnel-row'; lostRow.style.marginTop='10px';
   lostRow.innerHTML = `
     <div class="funnel-label" style="color:var(--critical)">Lost / disqualified</div>
