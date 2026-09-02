@@ -2276,7 +2276,15 @@ function matchPaymentBdeToOwner(paymentBde, ownerList){
 // signal available for it) so the per-entity total still reconciles to the Payment sheet's true
 // number without silently crediting a guessed BDE.
 function computePaymentAdmissionsByOwner(){
-  const rangePayments = ALL_PAYMENTS.filter(paymentMatchesDate);
+  // paymentDimMatch alongside paymentMatchesDate - was date-only before (2026-09-02 fix), which
+  // meant changing Degree/University/Program/Channel/Country/Region on the BDE tab correctly
+  // narrowed the CRM-sourced Leads column (via degreeChannelMatch in renderBdeEntityPanel below)
+  // but silently left Admissions/Lead->Payment computed off the full unfiltered payment set, since
+  // this function never checked those dimensions at all. Deliberately still excludes Entity, same
+  // as paymentDimMatch's own callers elsewhere - entity attribution here comes from
+  // OWNER_PRIMARY_ENTITY (matched rows) or the payment row's own entity tag (unmatched rows), not
+  // from filtering the payment pool by entity up front.
+  const rangePayments = ALL_PAYMENTS.filter(r => paymentMatchesDate(r) && paymentDimMatch(r));
   const byOwner = new Map();
   const unmatched = {Global:0, Saudi:0};
   const unmatchedNames = {Global:new Map(), Saudi:new Map()};
