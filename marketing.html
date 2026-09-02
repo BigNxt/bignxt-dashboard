@@ -1175,14 +1175,19 @@ function channelMix(rows){
 // Course-fee-booked AED per campaign, from the Payment sheet (the finance-verified revenue
 // figure) - joined onto the ads/CRM campaign table by exact campaign-name match. Most campaigns
 // won't have a match yet (most leads haven't reached admission), which is expected, not a bug.
-// Deliberately skips Entity (unlike paymentDimMatch) - this is reused by both the Entity-toggle-
-// respecting campaign table AND Recommendations, whose per-team panels filter by an explicit
-// entityValue instead of state.entity; a campaign name only ever belongs to one entity in
-// practice, so joining purely on campaign name is safe either way.
-function paymentFeeByCampaign(){
+// Takes an optional entityFilter ('Global'/'Saudi', or omitted/'All' for every entity combined) -
+// callers pass the entity they're actually scoped to (state.entity for the campaign table, the
+// explicit per-team entityValue for Recommendations) so a campaign's payments only attach to the
+// row/panel for the entity they actually belong to. This used to be entity-blind on the (mostly
+// true, but not always) assumption that "a campaign name only ever belongs to one entity" - broken
+// in practice by campaigns with a handful of stray cross-entity leads (e.g. a Country-field mention
+// of Saudi Arabia on an otherwise-Global Qatar & UAE campaign), where the entity-blind join used to
+// dump that campaign's ENTIRE Payment-sheet admissions/fee total onto the stray-entity row/panel.
+function paymentFeeByCampaign(entityFilter){
   const map = new Map();
   for(const r of ALL_PAYMENTS){
     if(!paymentMatchesDate(r) || !paymentDimMatch(r)) continue;
+    if(entityFilter && entityFilter!=='All' && r.entity!==entityFilter) continue;
     let o = map.get(r.campaign);
     // entity/degree/channel/geo are carried from the first payment row seen for this campaign -
     // only used as a fallback label when the campaign has no CRM/Ads row of its own to source them
@@ -1207,7 +1212,7 @@ function campaignTable(crmRows, adsRows){
     if(!o){ o = {cost:0, impressions:0, clicks:0, entity:r.entity, degree:r.degree, geo:r.geo, channel:r.channel}; adsMap.set(r.campaign,o); }
     o.cost += r.cost; o.impressions += r.impressions; o.clicks += r.clicks;
   }
-  const feeMap = paymentFeeByCampaign();
+  const feeMap = paymentFeeByCampaign(state.entity);
   const rows = [];
   for(const [campaign,o] of map){
     const ad = adsMap.get(campaign);
@@ -2174,7 +2179,7 @@ function computeRecoForEntity(entityValue){
   // against the team's own median) are Payment-sheet sourced here too, same as everywhere else.
   const rangePayments = ALL_PAYMENTS.filter(r => r.entity===entityValue && paymentMatchesDate(r) && paymentDimMatch(r));
   const toRows = keyFn => segmentBreakdown(rangeCRM, rangeAds, keyFn, keyFn, rangePayments).map(s=>({name:s.label, leads:s.leads, won:s.won, convRate:s.convRate, cost:s.cost, cac:s.cac}));
-  const feeMap = paymentFeeByCampaign();
+  const feeMap = paymentFeeByCampaign(entityValue);
   const campaignRows = toRows(r=>r.campaign).map(r=>{
     const fee = feeMap.get(r.name);
     const feeAED = fee ? fee.feeAED : null;
