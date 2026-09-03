@@ -545,7 +545,15 @@
   </div>
 
   <div id="bdeView" style="display:none;">
-    <div class="scope-note">A BDE&rsquo;s leads come almost entirely from one team already &mdash; Saudi-assigned BDEs work Saudi leads, Global-assigned BDEs work everyone else &mdash; so both teams are always shown side by side here regardless of the top Entity toggle. Degree/University/Program/Channel/Country/Region and the date range above all narrow this tab the same way they narrow every other tab. A handful of BDEs who&rsquo;ve left the team or only assign leads to others are excluded from this list entirely. <strong>Admissions and Lead&rarr;Payment here are Payment-sheet sourced</strong>, same source of truth as the rest of the report &mdash; matched to a CRM owner by name (exact match, then whole-name-token match, then prefix match; an ambiguous name like a bare &ldquo;Allan&rdquo; against two different Allans is left unmatched rather than guessed). Leads, Untouched % and the Lead&rarr;stage funnel columns stay CRM-status-based (no Payment-sheet equivalent exists for pipeline-progress stages before payment). Two things this join can&rsquo;t fully resolve: a lead is scoped here by its <em>creation</em> date while the Payment sheet&rsquo;s month is the finance team&rsquo;s <em>payment</em> cycle, so a BDE&rsquo;s Lead&rarr;Payment rate can look unusually high or low if a lot of this period&rsquo;s payments belong to leads created in a different period; and a BDE&rsquo;s entire admissions total is shown under whichever team they mostly work (their one home entity), even for a payment tagged to the other entity. Any Payment-sheet admissions that can&rsquo;t be confidently matched to a current CRM owner are still counted in the tiles above (so the totals reconcile to the Payment sheet) but are called out separately in the note below the table rather than attributed to a specific BDE.</div>
+    <div class="scope-note">A BDE&rsquo;s leads come almost entirely from one team already &mdash; Saudi-assigned BDEs work Saudi leads, Global-assigned BDEs work everyone else &mdash; so both teams are always shown side by side here regardless of the top Entity toggle. Degree/University/Program/Channel/Country/Region and the date range above all narrow this tab the same way they narrow every other tab. A handful of BDEs who&rsquo;ve left the team or only assign leads to others are excluded from this list entirely. <strong>Admissions and Lead&rarr;Payment here are Payment-sheet sourced</strong>, same source of truth as the rest of the report &mdash; matched to a CRM owner by name (exact match, then whole-name-token match, then prefix match; an ambiguous name like a bare &ldquo;Allan&rdquo; against two different Allans is left unmatched rather than guessed). Leads, Untouched % and the Lead&rarr;stage funnel columns stay CRM-status-based (no Payment-sheet equivalent exists for pipeline-progress stages before payment). Two things this join can&rsquo;t fully resolve: a lead is scoped here by its <em>creation</em> date while the Payment sheet&rsquo;s month is the finance team&rsquo;s <em>payment</em> cycle, so a BDE&rsquo;s Lead&rarr;Payment rate can look unusually high or low if a lot of this period&rsquo;s payments belong to leads created in a different period; and a BDE&rsquo;s entire admissions total is shown under whichever team they mostly work (their one home entity), even for a payment tagged to the other entity. Any Payment-sheet admissions that can&rsquo;t be confidently matched to a current CRM owner are still counted in the tiles above when no BDE below is selected (so the totals reconcile to the Payment sheet) but are called out separately in the note below the table rather than attributed to a specific BDE &mdash; and are left out of the tiles entirely once you narrow to specific BDEs, since an unmatched admission can&rsquo;t honestly be credited to your selection.</div>
+    <div class="fgroup" style="margin-bottom:14px;">
+      <span class="flabel">BDE</span>
+      <div class="ss-wrap" id="bdeOwnerSelectWrap">
+        <select id="bdeOwnerSelect" multiple style="position:absolute; opacity:0; pointer-events:none; width:1px; height:1px;"></select>
+        <input type="text" class="ss-input" id="bdeOwnerSearchInput" autocomplete="off" placeholder="All BDEs">
+        <div class="ss-panel" id="bdeOwnerSearchPanel"></div>
+      </div>
+    </div>
     <div class="entity-split">
       <div class="entity-col is-global">
         <div class="entity-head"><span class="entity-dot"></span><h2>Global BDEs</h2></div>
@@ -1154,7 +1162,10 @@ const state = {
   // Student Status tab's own filters - deliberately separate from the fields above (Entity/Degree/
   // date range don't apply to this tab's data at all, see its scope-note). Arrays, same multi-
   // select convention as every other filter dropdown - empty array means "All".
-  studentCountries:[], studentUniversities:[], studentStatuses:[]
+  studentCountries:[], studentUniversities:[], studentStatuses:[],
+  // BDE Performance tab's own filter - which BDE(s) to isolate, empty means "All BDEs" (both
+  // panels). Kept separate from the top-bar filters, same reasoning as Student Status above.
+  bdeOwners:[]
 };
 
 /* ---------------- formatting ---------------- */
@@ -2319,12 +2330,17 @@ function computePaymentAdmissionsByOwner(){
 }
 
 function renderBdeEntityPanel(entityValue, sortState, paymentAdm){
-  const rangeBde = ALL_BDE.filter(r => OWNER_PRIMARY_ENTITY[r.owner]===entityValue && matchesDate(r) && degreeChannelMatch(r));
+  const rangeBde = ALL_BDE.filter(r => OWNER_PRIMARY_ENTITY[r.owner]===entityValue && matchesDate(r) && degreeChannelMatch(r)
+    && (state.bdeOwners.length===0 || state.bdeOwners.includes(r.owner)));
   const {list, median:med} = bdeLeaderboard(rangeBde, paymentAdm.byOwner);
 
   const totalLeads = list.reduce((s,o)=>s+o.leads,0);
   const totalWonMatched = list.reduce((s,o)=>s+o.won,0);
-  const unmatchedAmt = paymentAdm.unmatched[entityValue] || 0;
+  // Unmatched Payment-sheet admissions (no confident CRM-owner match) can only fairly count toward
+  // the whole-team tiles - once the user narrows to specific BDEs below, an admission nobody could
+  // attribute to a name can't be honestly credited to that selection either, so it's dropped from
+  // the tiles rather than silently inflating whichever BDEs happen to be selected.
+  const unmatchedAmt = state.bdeOwners.length===0 ? (paymentAdm.unmatched[entityValue] || 0) : 0;
   const totalWon = totalWonMatched + unmatchedAmt;
   const tiles = [
     {label:'BDEs active', value:fmtInt(list.filter(o=>o.leads>0).length)},
@@ -3503,6 +3519,17 @@ function init(){
   specSel.innerHTML = specOrdered.map(s=>`<option value="${s}">${s}</option>`).join('');
   specSel.addEventListener('change', ()=>{ state.specializations = Array.from(specSel.selectedOptions).map(o=>o.value); render(); });
   wireSearchableSelect('specializationSelect', 'specializationSearchInput', 'specializationSearchPanel', 'All programs');
+
+  // BDE Performance tab's own BDE-isolation filter - lists every tracked BDE (both teams; each
+  // panel below only ever shows its own team's rows regardless of what's selected here), ordered
+  // by lead volume like every other dropdown's option list.
+  const bdeOwnerSel = document.getElementById('bdeOwnerSelect');
+  const bdeOwnerCounts = new Map();
+  for(const r of ALL_BDE){ bdeOwnerCounts.set(r.owner, (bdeOwnerCounts.get(r.owner)||0)+r.leads); }
+  const bdeOwnersOrdered = Array.from(bdeOwnerCounts.entries()).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+  bdeOwnerSel.innerHTML = bdeOwnersOrdered.map(o=>`<option value="${o}">${o}</option>`).join('');
+  bdeOwnerSel.addEventListener('change', ()=>{ state.bdeOwners = Array.from(bdeOwnerSel.selectedOptions).map(o=>o.value); renderBde(); });
+  wireSearchableSelect('bdeOwnerSelect', 'bdeOwnerSearchInput', 'bdeOwnerSearchPanel', 'All BDEs');
 
   syncDateInputs();
   document.getElementById('dateFromInput').min = MIN_DAY; document.getElementById('dateFromInput').max = MAX_DAY;
