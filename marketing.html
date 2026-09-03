@@ -442,6 +442,15 @@
         <div id="mixChart"></div>
       </div>
     </div>
+
+    <div class="grid2">
+      <div></div>
+      <div class="card">
+        <h2>Payments by channel</h2>
+        <div class="chint">Share of filtered Payment-sheet admissions attributed to each source &mdash; same Entity/Degree/date-range/etc filters as the rest of this tab. A channel can rank differently here than in Leads by channel above (e.g. On-Ground/Kiosk or Referral often converts a larger share of its leads than Facebook does, even with far fewer leads to start).</div>
+        <div id="paymentMixChart"></div>
+      </div>
+    </div>
   </div>
 
   <div id="summaryView" style="display:none;">
@@ -567,6 +576,7 @@
               <th class="num" data-key="untouchedPct">Untouched&nbsp;%<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="leadToProspect">Lead&rarr;Prospect<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="leadToHotProspect">Lead&rarr;Hot&nbsp;Prospect<span class="arrow">&#9662;</span></th>
+              <th class="num" data-key="leadToMeetingScheduled">Lead&rarr;Mtg&nbsp;Scheduled<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="leadToMeetingDone">Lead&rarr;Mtg&nbsp;Done<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="leadToApplication">Lead&rarr;App<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="meetingDoneToPayment">Mtg&nbsp;Done&rarr;Payment<span class="arrow">&#9662;</span></th>
@@ -590,6 +600,7 @@
               <th class="num" data-key="untouchedPct">Untouched&nbsp;%<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="leadToProspect">Lead&rarr;Prospect<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="leadToHotProspect">Lead&rarr;Hot&nbsp;Prospect<span class="arrow">&#9662;</span></th>
+              <th class="num" data-key="leadToMeetingScheduled">Lead&rarr;Mtg&nbsp;Scheduled<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="leadToMeetingDone">Lead&rarr;Mtg&nbsp;Done<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="leadToApplication">Lead&rarr;App<span class="arrow">&#9662;</span></th>
               <th class="num" data-key="meetingDoneToPayment">Mtg&nbsp;Done&rarr;Payment<span class="arrow">&#9662;</span></th>
@@ -1019,6 +1030,7 @@
         <th class="num" data-key="roi">ROI<span class="arrow">&#9662;</span></th>
         <th class="num" data-key="leadToProspect">Lead&rarr;Prospect<span class="arrow">&#9662;</span></th>
         <th class="num" data-key="leadToHotProspect">Lead&rarr;Hot&nbsp;Prospect<span class="arrow">&#9662;</span></th>
+        <th class="num" data-key="leadToMeetingScheduled">Lead&rarr;Meeting&nbsp;Scheduled<span class="arrow">&#9662;</span></th>
         <th class="num" data-key="leadToMeetingDone">Lead&rarr;Meeting&nbsp;Done<span class="arrow">&#9662;</span></th>
         <th class="num" data-key="leadToApplication">Lead&rarr;Application<span class="arrow">&#9662;</span></th>
         <th class="num" data-key="meetingDoneToApplication">Mtg&nbsp;Done&rarr;Application<span class="arrow">&#9662;</span></th>
@@ -1386,13 +1398,19 @@ function funnelConversions(rows, admissionOverride){
   // filter: cumulative read 2.3%, current-status read 0.1%, matching the CRM's own count exactly).
   const qualified = counts['Qualified']||0;
   const hotProspect = counts['Hot Prospect']||0;
+  const meetingScheduled = cum['Meeting Scheduled']||0;
   const meetingDone = cum['Meeting Done']||0;
   const applied = cum['Application Filled']||0;
   const admitted = cum['Admission']||0;
   const rate = (num, den) => den>0 ? num/den*100 : null;
+  // Index positions below are load-bearing: campaignTable() and bdeLeaderboard() both read this
+  // array positionally (conv[N].pct), not by label - inserting/reordering an entry here means
+  // updating those two call sites' indices to match (2026-09-03: inserted Lead -> Meeting
+  // Scheduled at index 2, shifting everything from Meeting Done onward down by one).
   return [
     {label:'Lead &rarr; Prospect', num:qualified, den:totalLeads, pct:rate(qualified, totalLeads), snapshot:true},
     {label:'Lead &rarr; Hot Prospect', num:hotProspect, den:totalLeads, pct:rate(hotProspect, totalLeads), snapshot:true},
+    {label:'Lead &rarr; Meeting Scheduled', num:meetingScheduled, den:totalLeads, pct:rate(meetingScheduled, totalLeads)},
     {label:'Lead &rarr; Meeting Done', num:meetingDone, den:totalLeads, pct:rate(meetingDone, totalLeads)},
     {label:'Lead &rarr; Application', num:applied, den:totalLeads, pct:rate(applied, totalLeads)},
     {label:'Meeting Done &rarr; Application', num:applied, den:meetingDone, pct:rate(applied, meetingDone)},
@@ -1405,6 +1423,14 @@ function funnelConversions(rows, admissionOverride){
 function channelMix(rows){
   const counts = {};
   for(const r of rows){ counts[r.channel] = (counts[r.channel]||0) + r.leads; }
+  return counts;
+}
+// Same shape as channelMix above but counts Payment-sheet admissions instead of CRM leads - takes
+// payment rows directly (e.g. from paymentAdmissionsForFilters()) rather than CRM rows, since
+// "payments by channel" needs the Payment sheet's own channel field, not CRM's.
+function paymentChannelMix(paymentRows){
+  const counts = {};
+  for(const r of paymentRows){ counts[r.channel] = (counts[r.channel]||0) + r.admissions; }
   return counts;
 }
 
@@ -1471,8 +1497,8 @@ function campaignTable(crmRows, adsRows){
       cac: (ad && won>0) ? ad.cost/won : null,
       feeAED: fee ? fee.feeAED : null,
       roi: (fee && ad && ad.cost>0) ? (fee.feeAED-ad.cost)/ad.cost*100 : null,
-      leadToProspect: conv[0].pct, leadToHotProspect: conv[1].pct, leadToMeetingDone: conv[2].pct, leadToApplication: conv[3].pct,
-      meetingDoneToApplication: conv[4].pct, meetingDoneToPayment: conv[5].pct, applicationToPayment: conv[6].pct
+      leadToProspect: conv[0].pct, leadToHotProspect: conv[1].pct, leadToMeetingScheduled: conv[2].pct, leadToMeetingDone: conv[3].pct, leadToApplication: conv[4].pct,
+      meetingDoneToApplication: conv[5].pct, meetingDoneToPayment: conv[6].pct, applicationToPayment: conv[7].pct
     });
   }
   for(const [campaign,ad] of adsMap){
@@ -1506,7 +1532,7 @@ function campaignTable(crmRows, adsRows){
       cost:null, impressions:null, clicks:null, cpl:null, cac:null,
       feeAED: fee.feeAED,
       roi: null,
-      leadToProspect:null, leadToHotProspect:null, leadToMeetingDone:null, leadToApplication:null,
+      leadToProspect:null, leadToHotProspect:null, leadToMeetingScheduled:null, leadToMeetingDone:null, leadToApplication:null,
       meetingDoneToApplication:null, meetingDoneToPayment:null, applicationToPayment:null
     });
   }
@@ -1766,12 +1792,12 @@ function renderFunnel(container, counts){
   container.appendChild(lostRow);
 }
 
-function renderMix(container, counts){
+function renderMix(container, counts, emptyLabel){
   container.innerHTML = '';
   const entries = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
   const total = entries.reduce((s,[,v])=>s+v,0) || 1;
   const maxV = Math.max(1, ...entries.map(([,v])=>v));
-  if(entries.length===0){ container.innerHTML = '<div class="empty-state">No leads in this selection.</div>'; return; }
+  if(entries.length===0){ container.innerHTML = `<div class="empty-state">No ${emptyLabel||'leads'} in this selection.</div>`; return; }
   entries.forEach(([ch,v])=>{
     const row = document.createElement('div'); row.className='mixbar-row';
     const color = CHANNEL_COLOR[ch] || 'var(--muted)';
@@ -1913,12 +1939,13 @@ function renderTable(rows){
       <td class="num">${r.roi!=null?(r.roi>=0?'+':'')+r.roi.toFixed(0)+'%':'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${pctOrDash(r.leadToProspect)}</td>
       <td class="num">${pctOrDash(r.leadToHotProspect)}</td>
+      <td class="num">${pctOrDash(r.leadToMeetingScheduled)}</td>
       <td class="num">${pctOrDash(r.leadToMeetingDone)}</td>
       <td class="num">${pctOrDash(r.leadToApplication)}</td>
       <td class="num">${pctOrDash(r.meetingDoneToApplication)}</td>
       <td class="num">${pctOrDash(r.meetingDoneToPayment)}</td>
       <td class="num">${pctOrDash(r.applicationToPayment)}</td>
-    </tr>`).join('') || '<tr><td colspan="23" class="empty-state">No campaigns match.</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="24" class="empty-state">No campaigns match.</td></tr>';
 
   document.getElementById('tableFoot').textContent =
     total>300 ? `Showing top 300 of ${total.toLocaleString()} matching campaigns ${EMDASH} sort or search to narrow.` : `${total.toLocaleString()} campaign${total===1?'':'s'}.`;
@@ -1943,7 +1970,7 @@ function round2(v){ return v==null ? null : Math.round(v*100)/100; }
 async function downloadCampaignCsv(){
   const headers = ['Campaign','Status','Entity','Degree','Channel','Geography','Leads','Admissions','Conv. %',
     'Spend (AED)','Impr.','Clicks','CPL','CAC','Fee Booked (AED)','ROI %',
-    'Lead to Prospect %','Lead to Hot Prospect %','Lead to Meeting Done %','Lead to Application %',
+    'Lead to Prospect %','Lead to Hot Prospect %','Lead to Meeting Scheduled %','Lead to Meeting Done %','Lead to Application %',
     'Meeting Done to Application %','Meeting Done to Payment %','Application to Payment %'];
   const lines = [headers.map(csvEscape).join(',')];
   lastCampaignRows.forEach(r=>{
@@ -1952,7 +1979,7 @@ async function downloadCampaignCsv(){
       r.leads, r.won, round2(r.convRate),
       round2(r.cost), r.impressions, r.clicks, round2(r.cpl), round2(r.cac),
       round2(r.feeAED), round2(r.roi),
-      round2(r.leadToProspect), round2(r.leadToHotProspect), round2(r.leadToMeetingDone), round2(r.leadToApplication),
+      round2(r.leadToProspect), round2(r.leadToHotProspect), round2(r.leadToMeetingScheduled), round2(r.leadToMeetingDone), round2(r.leadToApplication),
       round2(r.meetingDoneToApplication), round2(r.meetingDoneToPayment), round2(r.applicationToPayment)
     ].map(csvEscape).join(','));
   });
@@ -2138,12 +2165,14 @@ function render(){
   const leadsPerPeriod = lts.map(d=>d.total);
   renderBarChart(document.getElementById('spendChart'), periodLabels, ats.map(d=>d.cost), leadsPerPeriod, 'var(--s1)');
 
-  const trendsWon = paymentAdmissionsForFilters().reduce((s,r)=>s+r.admissions,0);
+  const trendsPayments = paymentAdmissionsForFilters();
+  const trendsWon = trendsPayments.reduce((s,r)=>s+r.admissions,0);
   document.getElementById('funnelHint').textContent =
     `${fmtInt(filteredCRM.reduce((s,r)=>s+r.leads,0))} leads in the current filter, snapshotted by CRM stage today. Admission figure is Payment-sheet sourced.`;
   renderFunnel(document.getElementById('funnelChart'), funnelBuckets(filteredCRM, trendsWon));
   renderFunnelConv(document.getElementById('funnelConv'), funnelConversions(filteredCRM, trendsWon));
   renderMix(document.getElementById('mixChart'), channelMix(filteredCRM));
+  renderMix(document.getElementById('paymentMixChart'), paymentChannelMix(trendsPayments), 'payments');
 
   renderTable(campaignTable(filteredCRM, filteredAds));
 
@@ -2258,8 +2287,8 @@ function bdeLeaderboard(rows, paymentByOwner){
     return {
       owner:o.owner, leads:o.leads, won,
       untouchedPct: o.leads>0 ? o.untouched/o.leads*100 : null,
-      leadToProspect: conv[0].pct, leadToHotProspect: conv[1].pct, leadToMeetingDone: conv[2].pct, leadToApplication: conv[3].pct,
-      meetingDoneToPayment: conv[5].pct,
+      leadToProspect: conv[0].pct, leadToHotProspect: conv[1].pct, leadToMeetingScheduled: conv[2].pct, leadToMeetingDone: conv[3].pct, leadToApplication: conv[4].pct,
+      meetingDoneToPayment: conv[6].pct,
       convRate: o.leads>0 ? won/o.leads*100 : null
     };
   });
@@ -2408,12 +2437,13 @@ function renderBdeEntityPanel(entityValue, sortState, paymentAdm){
       <td class="num">${pctOrDash(o.untouchedPct)}</td>
       <td class="num">${pctOrDash(o.leadToProspect)}</td>
       <td class="num">${pctOrDash(o.leadToHotProspect)}</td>
+      <td class="num">${pctOrDash(o.leadToMeetingScheduled)}</td>
       <td class="num">${pctOrDash(o.leadToMeetingDone)}</td>
       <td class="num">${pctOrDash(o.leadToApplication)}</td>
       <td class="num">${pctOrDash(o.meetingDoneToPayment)}</td>
       <td class="num">${fmtInt(o.won)}</td>
       <td class="num">${pctOrDash(o.convRate)}</td>
-    </tr>`).join('') || '<tr><td colspan="10" class="empty-state">No BDE data for this selection.</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="11" class="empty-state">No BDE data for this selection.</td></tr>';
 
   let footText = med!=null
     ? `${sorted.length} BDEs. Median lead-to-admission conversion: ${med.toFixed(1)}% (flag threshold: below ${(med*0.6).toFixed(1)}%, among BDEs with 10+ leads).`
