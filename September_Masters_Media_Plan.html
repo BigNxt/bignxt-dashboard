@@ -1,0 +1,535 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>September Masters Media Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#faf7f1; --paper-2:#f1ece1; --ink:#211d16; --ink-2:#4a4436; --muted:#8a8172;
+    --line:#ddd4c2; --line-soft:#e9e2d3;
+    --accent:#b5651d; --accent-ink:#fff7ee; --accent-soft:#f3e2cd;
+    --scale:#3f6f4f; --scale-soft:#dfe9dd; --scale-ink:#25422f;
+    --maintain:#8a6d1f; --maintain-soft:#efe6cb; --maintain-ink:#5c4a15;
+    --test:#3f6c8a; --test-soft:#dee9ef; --test-ink:#254a5f;
+    --pause:#a5402e; --pause-soft:#f2ded9; --pause-ink:#6e2a1e;
+    --card:#ffffff; --shadow: 0 1px 2px rgba(33,29,22,.06), 0 8px 24px -12px rgba(33,29,22,.12);
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --paper:#171310; --paper-2:#1e1a15; --ink:#f1eadd; --ink-2:#cdc3b2; --muted:#8f8574;
+      --line:#3a3327; --line-soft:#2c271e;
+      --accent:#e0954b; --accent-ink:#241505; --accent-soft:#3a2a15;
+      --scale:#6fae82; --scale-soft:#1e2c22; --scale-ink:#a9d6b6;
+      --maintain:#d0b25a; --maintain-soft:#2e2914; --maintain-ink:#e3cd8c;
+      --test:#7fb2d6; --test-soft:#1b2831; --test-ink:#a9d0e8;
+      --pause:#e08268; --pause-soft:#33201a; --pause-ink:#eeb3a1;
+      --card:#1e1a15; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#171310; --paper-2:#1e1a15; --ink:#f1eadd; --ink-2:#cdc3b2; --muted:#8f8574;
+    --line:#3a3327; --line-soft:#2c271e;
+    --accent:#e0954b; --accent-ink:#241505; --accent-soft:#3a2a15;
+    --scale:#6fae82; --scale-soft:#1e2c22; --scale-ink:#a9d6b6;
+    --maintain:#d0b25a; --maintain-soft:#2e2914; --maintain-ink:#e3cd8c;
+    --test:#7fb2d6; --test-soft:#1b2831; --test-ink:#a9d0e8;
+    --pause:#e08268; --pause-soft:#33201a; --pause-ink:#eeb3a1;
+    --card:#1e1a15; --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    font-size:15px; line-height:1.55;
+  }
+  .num, .tabular{ font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; }
+  .mono{ font-family:'IBM Plex Mono', ui-monospace, monospace; }
+
+  .wrap{ max-width:1180px; margin:0 auto; padding:56px 32px 96px; }
+
+  h1,h2,h3{ font-family:'Fraunces', Georgia, serif; text-wrap:balance; color:var(--ink); margin:0; }
+  h1{ font-size:clamp(32px,4.4vw,50px); font-weight:600; letter-spacing:-.01em; }
+  h2{ font-size:26px; font-weight:600; }
+  h3{ font-size:17px; font-weight:600; }
+  p{ margin:0; color:var(--ink-2); }
+
+  header.hero{
+    display:flex; flex-direction:column; gap:18px; padding-bottom:36px; margin-bottom:40px;
+    border-bottom:1px solid var(--line);
+  }
+  .eyebrow{
+    font-size:12px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--accent);
+  }
+  .hero-meta{ display:flex; flex-wrap:wrap; gap:28px; margin-top:6px; }
+  .hero-meta div{ display:flex; flex-direction:column; gap:4px; }
+  .hero-meta .k{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:600; }
+  .hero-meta .v{ font-family:'Fraunces', serif; font-size:22px; font-weight:600; color:var(--ink); }
+  .hero-meta .v.accent{ color:var(--accent); }
+
+  section{ margin-bottom:56px; }
+  section > .sechead{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+  .sec-note{ font-size:13px; color:var(--muted); max-width:46ch; }
+
+  /* Executive summary cards */
+  .findings{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; align-items:start; }
+  .finding{
+    background:var(--card); border:1px solid var(--line); border-radius:10px; padding:20px 20px 18px;
+    box-shadow:var(--shadow); display:flex; flex-direction:column; gap:10px;
+  }
+  .finding .tag{ font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+  .finding .tag.cut{ color:var(--pause); }
+  .finding .tag.grow{ color:var(--scale); }
+  .finding .tag.shift{ color:var(--accent); }
+  .finding .tag.test{ color:var(--test); }
+  .finding .stat{ font-family:'Fraunces', serif; font-size:26px; font-weight:600; }
+  .finding .desc{ font-size:13.5px; color:var(--ink-2); }
+
+  /* Allocation summary bars */
+  .split-row{ display:flex; align-items:center; gap:14px; margin-bottom:10px; }
+  .split-row .label{ width:150px; flex-shrink:0; font-size:13px; font-weight:600; }
+  .split-row .bar-track{ flex:1; height:22px; background:var(--paper-2); border-radius:5px; overflow:hidden; display:flex; border:1px solid var(--line-soft); }
+  .split-row .bar-fill{ height:100%; }
+  .split-row .amt{ width:150px; text-align:right; font-size:13px; flex-shrink:0; }
+  .split-row .amt .pct{ color:var(--muted); font-size:11.5px; }
+
+  .legend{ display:flex; gap:18px; flex-wrap:wrap; margin-top:6px; margin-bottom:28px; }
+  .legend span{ display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-2); }
+  .legend i{ width:10px; height:10px; border-radius:3px; display:inline-block; }
+
+  /* Tables */
+  .tablewrap{ overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--card); box-shadow:var(--shadow); }
+  table{ border-collapse:collapse; width:100%; min-width:760px; }
+  thead th{
+    text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; font-weight:600;
+    color:var(--muted); padding:11px 14px; border-bottom:1px solid var(--line); background:var(--paper-2);
+    white-space:nowrap; position:sticky; top:0;
+  }
+  thead th.num, td.num{ text-align:right; }
+  tbody td{ padding:11px 14px; border-bottom:1px solid var(--line-soft); font-size:13.5px; white-space:nowrap; }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:var(--paper-2); }
+  td.name{ white-space:normal; min-width:190px; }
+  td.name .sub{ display:block; font-size:11.5px; color:var(--muted); margin-top:2px; }
+  tfoot td{ padding:12px 14px; font-weight:700; border-top:2px solid var(--line); background:var(--paper-2); }
+
+  .status{
+    display:inline-block; padding:3px 9px; border-radius:100px; font-size:10.5px; font-weight:700;
+    letter-spacing:.03em; text-transform:uppercase; white-space:nowrap;
+  }
+  .status.scale{ background:var(--scale-soft); color:var(--scale-ink); }
+  .status.maintain{ background:var(--maintain-soft); color:var(--maintain-ink); }
+  .status.test{ background:var(--test-soft); color:var(--test-ink); }
+  .status.pause{ background:var(--pause-soft); color:var(--pause-ink); }
+
+  .delta{ font-size:12px; }
+  .delta.up{ color:var(--scale); }
+  .delta.down{ color:var(--pause); }
+
+  /* Program x country matrix */
+  .matrix-wrap{ overflow-x:auto; }
+  .matrix{ border-collapse:collapse; width:100%; min-width:820px; }
+  .matrix th{ font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); font-weight:600; padding:9px 10px; text-align:center; border-bottom:1px solid var(--line); }
+  .matrix th:first-child{ text-align:left; }
+  .matrix td{ padding:9px 10px; text-align:center; border-bottom:1px solid var(--line-soft); font-size:12.5px; }
+  .matrix td:first-child{ text-align:left; font-weight:600; white-space:nowrap; }
+  .cell{ display:inline-flex; flex-direction:column; align-items:center; border-radius:7px; padding:5px 8px; min-width:56px; }
+  .cell .cr{ font-weight:700; font-size:13px; }
+  .cell .n{ font-size:10px; color:var(--muted); }
+  .cell.best{ background:var(--scale-soft); color:var(--scale-ink); }
+  .cell.good{ background:var(--maintain-soft); color:var(--maintain-ink); }
+  .cell.weak{ background:var(--pause-soft); color:var(--pause-ink); opacity:.8; }
+  .cell.empty{ color:var(--line); }
+
+  /* Action lists */
+  .actions{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media (max-width:820px){ .actions{ grid-template-columns:1fr; } }
+  .action-card{ background:var(--card); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); overflow:hidden; }
+  .action-card .hd{ padding:14px 18px; font-weight:700; font-size:13px; letter-spacing:.03em; text-transform:uppercase; display:flex; align-items:center; gap:8px; }
+  .action-card.pause .hd{ background:var(--pause-soft); color:var(--pause-ink); }
+  .action-card.scale .hd{ background:var(--scale-soft); color:var(--scale-ink); }
+  .action-card ul{ list-style:none; margin:0; padding:6px 0; }
+  .action-card li{ padding:11px 18px; border-bottom:1px solid var(--line-soft); font-size:13px; }
+  .action-card li:last-child{ border-bottom:none; }
+  .action-card .campaign{ font-weight:600; display:block; margin-bottom:3px; }
+  .action-card .figs{ color:var(--muted); font-size:12px; }
+  .action-card .figs b{ color:var(--ink); font-weight:600; }
+
+  .callout{
+    border-left:3px solid var(--accent); background:var(--accent-soft); border-radius:0 8px 8px 0;
+    padding:16px 20px; font-size:13.5px; color:var(--ink-2); display:flex; flex-direction:column; gap:6px;
+  }
+  .callout b{ color:var(--ink); }
+
+  .risks{ display:flex; flex-direction:column; gap:10px; }
+  .risk{ display:flex; gap:12px; padding:14px 16px; background:var(--card); border:1px solid var(--line); border-radius:8px; }
+  .risk .badge{ flex-shrink:0; width:26px; height:26px; border-radius:100px; background:var(--test-soft); color:var(--test-ink); display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:700; font-size:13px; }
+  .risk .body b{ display:block; font-size:13.5px; margin-bottom:2px; color:var(--ink); }
+  .risk .body span{ font-size:13px; color:var(--ink-2); }
+
+  footer.close{ margin-top:64px; padding-top:24px; border-top:1px solid var(--line); display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; font-size:12px; color:var(--muted); }
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">BigNxt Group &middot; Marketing &middot; Media Plan</div>
+    <h1>September 2026 &mdash; Global, Masters</h1>
+    <p style="max-width:62ch; font-size:15.5px;">A campaign-and-country level spend plan built from eight months of actual CRM, ad-spend, and Payment-sheet performance (Jan&ndash;Aug 2026), optimized to maximize September admissions and course-fee revenue &mdash; not just leads.</p>
+    <div class="hero-meta">
+      <div><span class="k">Budget</span><span class="v accent num">AED 60,000</span></div>
+      <div><span class="k">Projected leads</span><span class="v num">4,171&ndash;5,000</span></div>
+      <div><span class="k">Projected payments</span><span class="v num">~31</span></div>
+      <div><span class="k">Projected revenue</span><span class="v num">AED 647K+</span></div>
+      <div><span class="k">Data window</span><span class="v" style="font-size:16px;">Jan 1 &ndash; Aug 31, 2026</span></div>
+    </div>
+  </header>
+
+  <div class="callout" style="margin-bottom:40px;">
+    <span><b>Revised Sep 1, second pass.</b> Team can handle up to 5,000 leads (not below 5,000 &mdash; the ceiling moved up), with a floor of at least 30 payments. Oman is now a fixed AED 8,000 rather than sized off its historical CPL. LinkedIn splits into two named campaigns (Africa multi-country, and a new Qatar &amp; UAE buy) instead of Africa + Kenya. South Africa&rsquo;s allocation is corrected &mdash; it was tagged &ldquo;Scale&rdquo; while actually being cut 61% below its recent pace, which was a genuine inconsistency in the first revision; it&rsquo;s funded to match the label now.</span>
+  </div>
+  <div class="callout" style="margin-bottom:40px;">
+    <span><b>Third pass, checked against last 7 days of actuals.</b> Qatar &amp; UAE&rsquo;s CPL assumption moves from a flat historical hold to a benched AED&nbsp;50 &mdash; the midpoint between its 8-month average (84.6) and its real Aug 25&ndash;31 rate (43.3). Oman turned up a real problem, not just a number: its Facebook campaign has had <b>zero spend since Aug 21</b> &mdash; it needs a delivery check/relaunch before September budget can do anything there, and its CPL assumption stays at the historical floor since there&rsquo;s no recent data yet to bench it against.</span>
+  </div>
+  <div class="callout" style="margin-bottom:40px;">
+    <span><b>Fourth pass, per instruction.</b> Oman moves to AED&nbsp;10,000 (from 8,000) and Kuwait to AED&nbsp;5,000 (from 3,000), funded by a flat 20% trim across all five Africa Scale markets (AED&nbsp;4,000 combined) rather than cutting any single country. Oman&rsquo;s CPL assumption also moves to a benched AED&nbsp;50, matching Qatar &amp; UAE&rsquo;s number &mdash; but unlike Qatar &amp; UAE, Oman has <b>no recent data behind that number at all</b> (still zero spend since Aug 21), so it&rsquo;s a planning assumption, not yet a benched rate the same way Qatar &amp; UAE&rsquo;s is; the relaunch is still the real blocker, not the CPL figure. Total budget stays AED&nbsp;60,000. Net effect: projected payments fall from ~34 to <b>~31</b> and projected revenue from AED&nbsp;718K+ to <b>AED&nbsp;647K+</b>, since GCC&rsquo;s higher-CPL/lower-ROI economics now carry a bigger share of the plan &mdash; a real tradeoff, not a rounding change (see Risks, updated below).</span>
+  </div>
+
+  <section id="findings">
+    <div class="sechead"><h2>What the data says</h2></div>
+    <div class="findings">
+      <div class="finding">
+        <span class="tag cut">Cut</span>
+        <span class="stat num">AED 132,500</span>
+        <span class="desc">spent on 13 GCC campaigns (mostly Qatar &amp; UAE / Kuwait / Oman &ldquo;MBA&rdquo; and generic variants) that produced <b>zero</b> admissions across 8 months. Named in full below &mdash; stop funding these specifically, not the countries broadly.</span>
+      </div>
+      <div class="finding">
+        <span class="tag grow">South Africa, corrected</span>
+        <span class="stat num">1,000 &rarr; 4,000 AED</span>
+        <span class="desc">the previous draft cut South Africa 61% below its recent pace while still calling it &ldquo;Scale&rdquo; &mdash; a real inconsistency, corrected to 5,000 on the strength of its 1,186% ROI. The fourth pass trims it slightly further, alongside the other four Africa markets, to fund Oman/Kuwait &mdash; still +57% vs. recent pace.</span>
+      </div>
+      <div class="finding">
+        <span class="tag test">Qatar &amp; UAE, benched not averaged</span>
+        <span class="stat num">84.6 &rarr; 50 AED</span>
+        <span class="desc">CPL assumption moves off the 8-month average and onto AED 50 &mdash; roughly the midpoint between that average and its real Aug 25&ndash;31 rate of AED 43.3. One good week, treated as a signal, not yet a new baseline.</span>
+      </div>
+      <div class="finding">
+        <span class="tag cut">Oman needs a relaunch, not just a budget</span>
+        <span class="stat num">0 spend, 10 days</span>
+        <span class="desc">its Facebook campaign hasn&rsquo;t delivered since Aug&nbsp;21 &mdash; check for a paused campaign, exhausted budget, or a disapproved ad before September spend can do anything. Its CPL assumption is now a benched AED 50 per instruction, but with no recent delivery to validate that number against &mdash; the relaunch is still the real blocker, not the figure.</span>
+      </div>
+      <div class="finding">
+        <span class="tag shift">LinkedIn, two campaigns</span>
+        <span class="stat num">12,000 AED &middot; 20%</span>
+        <span class="desc">Africa multi-country (proven, AED 8,000) and a new Qatar &amp; UAE buy (AED 4,000, no historical baseline to project from &mdash; genuinely untested).</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="allocation-summary">
+    <div class="sechead">
+      <h2>Where the AED 60,000 goes</h2>
+      <div class="sec-note">By strategic role, then by channel. Full row-by-row detail follows below.</div>
+    </div>
+
+    <h3 style="margin-bottom:14px; font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;">By role</h3>
+    <div class="split-row">
+      <div class="label">Maintain (GCC, focused)</div>
+      <div class="bar-track"><div class="bar-fill" style="width:50.0%; background:var(--maintain);"></div></div>
+      <div class="amt num">AED 30,000 <span class="pct">50%</span></div>
+    </div>
+    <div class="split-row">
+      <div class="label">Scale (Africa, proven)</div>
+      <div class="bar-track"><div class="bar-fill" style="width:26.7%; background:var(--scale);"></div></div>
+      <div class="amt num">AED 16,000 <span class="pct">27%</span></div>
+    </div>
+    <div class="split-row">
+      <div class="label">Explore (LinkedIn, 2 campaigns)</div>
+      <div class="bar-track"><div class="bar-fill" style="width:20%; background:var(--test);"></div></div>
+      <div class="amt num">AED 12,000 <span class="pct">20%</span></div>
+    </div>
+    <div class="split-row">
+      <div class="label">Test (Google only)</div>
+      <div class="bar-track"><div class="bar-fill" style="width:3.3%; background:var(--accent);"></div></div>
+      <div class="amt num">AED 2,000 <span class="pct">3%</span></div>
+    </div>
+
+    <h3 style="margin:26px 0 14px; font-size:14px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em;">By channel</h3>
+    <div class="split-row">
+      <div class="label">Facebook Ads</div>
+      <div class="bar-track"><div class="bar-fill" style="width:76.7%; background:var(--ink-2);"></div></div>
+      <div class="amt num">AED 46,000 <span class="pct">77%</span></div>
+    </div>
+    <div class="split-row">
+      <div class="label">LinkedIn Ads</div>
+      <div class="bar-track"><div class="bar-fill" style="width:20%; background:var(--test);"></div></div>
+      <div class="amt num">AED 12,000 <span class="pct">20%</span></div>
+    </div>
+    <div class="split-row">
+      <div class="label">Google Ads</div>
+      <div class="bar-track"><div class="bar-fill" style="width:3.3%; background:var(--accent);"></div></div>
+      <div class="amt num">AED 2,000 <span class="pct">3%</span></div>
+    </div>
+  </section>
+
+  <section id="country-table">
+    <div class="sechead">
+      <h2>Country &times; channel allocation</h2>
+      <div class="sec-note">CPL/CAC/ROI are each row&rsquo;s own Jan&ndash;Aug actuals. Projections apply that same per-unit rate to the September budget &mdash; treat as a planning estimate, not a guarantee (see Risks).</div>
+    </div>
+    <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>Country</th><th>Channel</th><th>Status</th>
+        <th class="num">Sept budget</th><th class="num">vs recent pace</th>
+        <th class="num">Hist. CPL</th><th class="num">Hist. CAC</th><th class="num">Hist. ROI</th>
+        <th class="num">Proj. leads</th><th class="num">Proj. payments</th><th class="num">Proj. revenue</th>
+      </tr></thead>
+      <tbody class="num mono">
+        <tr>
+          <td class="name" style="font-family:'IBM Plex Sans',sans-serif;">Qatar &amp; UAE<span class="sub" style="font-family:'IBM Plex Sans',sans-serif;">AI&nbsp;&amp;&nbsp;Data&nbsp;Science + Fintech only &middot; CPL benched at AED&nbsp;50</span></td><td>Facebook</td><td><span class="status maintain">Maintain</span></td>
+          <td>15,000</td><td class="delta down">&minus;28%</td><td>50&Dagger;</td><td>3,442</td><td>688%</td>
+          <td>300</td><td>~4</td><td>118,200</td>
+        </tr>
+        <tr>
+          <td class="name" style="font-family:'IBM Plex Sans',sans-serif;">Oman<span class="sub" style="font-family:'IBM Plex Sans',sans-serif;">AI&nbsp;&amp;&nbsp;Data&nbsp;Science lead, Project Mgmt test &middot; CPL benched at AED&nbsp;50, pending relaunch</span></td><td>Facebook</td><td><span class="status maintain">Maintain</span></td>
+          <td>10,000</td><td class="delta up">+161%</td><td>50&dagger;</td><td>4,889</td><td>420%</td>
+          <td>200</td><td>~2</td><td>52,000</td>
+        </tr>
+        <tr>
+          <td class="name" style="font-family:'IBM Plex Sans',sans-serif;">Kuwait<span class="sub" style="font-family:'IBM Plex Sans',sans-serif;">AI&nbsp;&amp;&nbsp;Data&nbsp;Science only</span></td><td>Facebook</td><td><span class="status maintain">Maintain</span></td>
+          <td>5,000</td><td class="delta up">+70%</td><td>36.9</td><td>6,017</td><td>346%</td>
+          <td>135</td><td>~1</td><td>22,300</td>
+        </tr>
+        <tr>
+          <td class="name" style="font-family:'IBM Plex Sans',sans-serif;">Zimbabwe</td><td>Facebook</td><td><span class="status scale">Scale</span></td>
+          <td>3,200</td><td class="delta up">+15%</td><td>5.0</td><td>784</td><td>2,454%</td>
+          <td>640</td><td>~4</td><td>81,700</td>
+        </tr>
+        <tr>
+          <td class="name" style="font-family:'IBM Plex Sans',sans-serif;">Ghana</td><td>Facebook</td><td><span class="status scale">Scale</span></td>
+          <td>3,200</td><td class="delta up">+75%</td><td>4.8</td><td>675</td><td>2,646%</td>
+          <td>667</td><td>~5</td><td>87,900</td>
+        </tr>
+        <tr>
+          <td class="name" style="font-family:'IBM Plex Sans',sans-serif;">Kenya</td><td>Facebook</td><td><span class="status scale">Scale</span></td>
+          <td>2,800</td><td class="delta up">+77%</td><td>3.6</td><td>794</td><td>2,475%</td>
+          <td>778</td><td>~4</td><td>72,100</td>
+        </tr>
+        <tr>
+          <td class="name" style="font-family:'IBM Plex Sans',sans-serif;">Zambia</td><td>Facebook</td><td><span class="status scale">Scale</span></td>
+          <td>2,800</td><td class="delta up">+20%</td><td>4.6</td><td>1,043</td><td>1,665%</td>
+          <td>609</td><td>~3</td><td>49,400</td>
+        </tr>
+        <tr>
+          <td class="name" style="font-family:'IBM Plex Sans',sans-serif;">South Africa</td><td>Facebook</td><td><span class="status scale">Scale</span></td>
+          <td>4,000</td><td class="delta up">+57%</td><td>11.1</td><td>1,427</td><td>1,186%</td>
+          <td>360</td><td>~3</td><td>51,400</td>
+        </tr>
+        <tr>
+          <td class="name" style="font-family:'IBM Plex Sans',sans-serif;">Africa (multi-country)<span class="sub" style="font-family:'IBM Plex Sans',sans-serif;">Project Mgmt + Fintech creative</span></td><td>LinkedIn</td><td><span class="status scale">Scale</span></td>
+          <td>8,000</td><td class="delta up">+234%</td><td>16.6</td><td>1,536</td><td>1,358%</td>
+          <td>482</td><td>~5</td><td>112,000</td>
+        </tr>
+        <tr>
+          <td class="name" style="font-family:'IBM Plex Sans',sans-serif;">Qatar &amp; UAE<span class="sub" style="font-family:'IBM Plex Sans',sans-serif;">new campaign &mdash; no historical baseline to project from</span></td><td>LinkedIn</td><td><span class="status test">Test</span></td>
+          <td>4,000</td><td class="delta up">new</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+          <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+        </tr>
+        <tr>
+          <td class="name" style="font-family:'IBM Plex Sans',sans-serif;">Best-performing programs, top countries<span class="sub" style="font-family:'IBM Plex Sans',sans-serif;">new channel &mdash; sample too small to project</span></td><td>Google</td><td><span class="status test">Test</span></td>
+          <td>2,000</td><td class="delta down">trimmed</td><td>1.5*</td><td>479*</td><td>3,545%*</td>
+          <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+        </tr>
+        <tr>
+          <td class="name" style="font-family:'IBM Plex Sans',sans-serif;">Nigeria<span class="sub" style="font-family:'IBM Plex Sans',sans-serif;">strong unit economics, but paused for now per instruction</span></td><td>&mdash;</td><td><span class="status pause">Pause</span></td>
+          <td>0</td><td class="delta down">&minus;100%</td><td>3.4</td><td>624</td><td>3,226%</td>
+          <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+        </tr>
+        <tr>
+          <td class="name" style="font-family:'IBM Plex Sans',sans-serif;">India, Rwanda<span class="sub" style="font-family:'IBM Plex Sans',sans-serif;">cheap leads, near-zero conversion</span></td><td>&mdash;</td><td><span class="status pause">Pause</span></td>
+          <td>0</td><td class="delta down">&minus;100%</td><td>7&ndash;9</td><td>8,973&ndash;11,118</td><td>147&ndash;179%</td>
+          <td>&mdash;</td><td>&mdash;</td><td>&mdash;</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="3" style="font-family:'IBM Plex Sans',sans-serif;">Total</td>
+          <td class="num">60,000</td><td></td><td></td><td></td><td></td>
+          <td class="num">4,171+</td><td class="num">~31</td><td class="num">647,000+</td>
+        </tr>
+      </tfoot>
+    </table>
+    </div>
+    <p style="font-size:11.5px; color:var(--muted); margin-top:8px;">&dagger;Oman&rsquo;s CPL is set to a benched AED 50 per instruction &mdash; unlike Qatar &amp; UAE&rsquo;s AED 50 below, this one has <b>no recent data behind it at all</b>: its Facebook campaign has had zero spend since Aug 21 (10+ days with no delivery at data cutoff), so it&rsquo;s a planning assumption, not yet a benched rate the same way Qatar &amp; UAE&rsquo;s is; relaunch/delivery-check it before counting on the 200-lead estimate. &Dagger;Qatar &amp; UAE&rsquo;s CPL is benched at AED 50, not its 84.6 historical average &mdash; splitting the difference between that average and its actual Aug 25&ndash;31 rate of AED 43.3, which is real recent data but only one week of it. Payments/revenue for both rows are still computed off historical cost-per-payment (not adjusted upward for the cheaper CPL), since more/cheaper leads aren&rsquo;t guaranteed to convert at the same rate as historical &mdash; confirm after 2&ndash;3 weeks. *Google Ads and the new Qatar &amp; UAE LinkedIn line have no reliable base rate to project from yet &mdash; both are genuine tests, upside only.</p>
+  </section>
+
+  <section id="program-matrix">
+    <div class="sechead">
+      <h2>Which program works where</h2>
+      <div class="sec-note">Lead&rarr;payment conversion rate by specialization and country, Jan&ndash;Aug actuals. Use this to steer creative and landing pages within each country&rsquo;s budget above &mdash; darker green converts best.</div>
+    </div>
+    <div class="matrix-wrap">
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Country</th>
+          <th>AI &amp; Data Science</th>
+          <th>Fintech</th>
+          <th>MBA / Bus. Admin</th>
+          <th>Project Mgmt</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Qatar &amp; UAE</td>
+          <td><span class="cell best"><span class="cr">1.95%</span><span class="n">10 pay</span></span></td>
+          <td><span class="cell good"><span class="cr">1.82%</span><span class="n">7 pay</span></span></td>
+          <td><span class="cell weak"><span class="cr">0.50%</span><span class="n">2 pay</span></span></td>
+          <td><span class="cell empty">&mdash;</span></td>
+        </tr>
+        <tr>
+          <td>Oman</td>
+          <td><span class="cell good"><span class="cr">1.69%</span><span class="n">6 pay</span></span></td>
+          <td><span class="cell empty">&mdash;</span></td>
+          <td><span class="cell weak"><span class="cr">0.48%</span><span class="n">2 pay</span></span></td>
+          <td><span class="cell best"><span class="cr">2.82%</span><span class="n">4 pay</span></span></td>
+        </tr>
+        <tr>
+          <td>Kuwait</td>
+          <td><span class="cell good"><span class="cr">0.73%</span><span class="n">4 pay</span></span></td>
+          <td><span class="cell weak"><span class="cr">0.97%</span><span class="n">1 pay</span></span></td>
+          <td><span class="cell weak"><span class="cr">0.45%</span><span class="n">3 pay</span></span></td>
+          <td><span class="cell empty">&mdash;</span></td>
+        </tr>
+        <tr>
+          <td>Zimbabwe</td>
+          <td><span class="cell weak"><span class="cr">0.45%</span><span class="n">6 pay</span></span></td>
+          <td><span class="cell empty">&mdash;</span></td>
+          <td><span class="cell good"><span class="cr">0.71%</span><span class="n">7 pay</span></span></td>
+          <td><span class="cell empty">&mdash;</span></td>
+        </tr>
+        <tr>
+          <td>Kenya</td>
+          <td><span class="cell weak"><span class="cr">0.61%</span><span class="n">3 pay</span></span></td>
+          <td><span class="cell good"><span class="cr">0.78%</span><span class="n">4 pay</span></span></td>
+          <td><span class="cell best"><span class="cr">0.66%</span><span class="n">7 pay</span></span></td>
+          <td><span class="cell empty">&mdash;</span></td>
+        </tr>
+        <tr>
+          <td>Zambia</td>
+          <td><span class="cell best"><span class="cr">0.51%</span><span class="n">4 pay</span></span></td>
+          <td><span class="cell weak"><span class="cr">0.17%</span><span class="n">1 pay</span></span></td>
+          <td><span class="cell weak"><span class="cr">0.24%</span><span class="n">2 pay</span></span></td>
+          <td><span class="cell empty">&mdash;</span></td>
+        </tr>
+        <tr>
+          <td>Ghana</td>
+          <td><span class="cell good"><span class="cr">0.63%</span><span class="n">3 pay</span></span></td>
+          <td><span class="cell best"><span class="cr">0.80%</span><span class="n">4 pay</span></span></td>
+          <td><span class="cell weak"><span class="cr">0.67%</span><span class="n">2 pay</span></span></td>
+          <td><span class="cell empty">&mdash;</span></td>
+        </tr>
+        <tr>
+          <td>South Africa</td>
+          <td><span class="cell best"><span class="cr">0.93%</span><span class="n">4 pay</span></span></td>
+          <td><span class="cell weak"><span class="cr">0.68%</span><span class="n">1 pay</span></span></td>
+          <td><span class="cell good"><span class="cr">0.72%</span><span class="n">4 pay</span></span></td>
+          <td><span class="cell empty">&mdash;</span></td>
+        </tr>
+        <tr>
+          <td>Nigeria</td>
+          <td><span class="cell empty">&mdash;</span></td>
+          <td><span class="cell weak"><span class="cr">0.35%</span><span class="n">2 pay</span></span></td>
+          <td><span class="cell best"><span class="cr">0.78%</span><span class="n">2 pay</span></span></td>
+          <td><span class="cell empty">&mdash;</span></td>
+        </tr>
+        <tr>
+          <td>Africa (multi, LI)</td>
+          <td><span class="cell weak"><span class="cr">0.24%</span><span class="n">1 pay</span></span></td>
+          <td><span class="cell good"><span class="cr">1.22%</span><span class="n">5 pay</span></span></td>
+          <td><span class="cell weak"><span class="cr">0.16%</span><span class="n">1 pay</span></span></td>
+          <td><span class="cell best"><span class="cr">2.17%</span><span class="n">2 pay</span></span></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout" style="margin-top:16px;">
+      <span><b>Reading this against the budget above:</b> Qatar&nbsp;&amp;&nbsp;UAE and Oman creative should stay AI&nbsp;&amp;&nbsp;Data&nbsp;Science-led (Oman&rsquo;s Project Management cell is the single best conversion rate on the whole grid, 2.82%, but on only 4 payments &mdash; worth a small dedicated test, not a reallocation yet). Zimbabwe and Kenya should lead with MBA/Business Administration creative even though AI&nbsp;&amp;&nbsp;DS drives more raw volume there &mdash; MBA converts better per lead in both. Zambia and South Africa should stay AI&nbsp;&amp;&nbsp;DS-led; Ghana and the LinkedIn Africa buy should lead with Fintech.</span>
+    </div>
+  </section>
+
+  <section id="actions">
+    <div class="sechead">
+      <h2>Specific campaign calls</h2>
+      <div class="sec-note">Named campaigns, not just markets &mdash; two markets can share a country and have completely different outcomes.</div>
+    </div>
+    <div class="actions">
+      <div class="action-card pause">
+        <div class="hd">Stop funding &mdash; zero payments, real spend</div>
+        <ul class="mono">
+          <li><span class="campaign" style="font-family:'IBM Plex Sans',sans-serif;">GEM / MBA / Qatar &amp; UAE / 17/2/2026</span><span class="figs">AED <b>21,201</b> spent &middot; 0 payments</span></li>
+          <li><span class="campaign" style="font-family:'IBM Plex Sans',sans-serif;">EUG / MBA / Health / Qatar &amp; UAE / 23/2/2026 / FB</span><span class="figs">AED <b>15,452</b> spent &middot; 0 payments</span></li>
+          <li><span class="campaign" style="font-family:'IBM Plex Sans',sans-serif;">GEM / Master AI / Oman / 12/12/2025 / FB</span><span class="figs">AED <b>13,635</b> spent &middot; 0 payments</span></li>
+          <li><span class="campaign" style="font-family:'IBM Plex Sans',sans-serif;">GEM / Master AI / Kuwait / 8/10/2025 / FB</span><span class="figs">AED <b>13,197</b> spent &middot; 0 payments</span></li>
+          <li><span class="campaign" style="font-family:'IBM Plex Sans',sans-serif;">EUG / MBA / Health / Oman / 15/06/2026 / FB</span><span class="figs">AED <b>11,555</b> spent &middot; 0 payments</span></li>
+          <li><span class="campaign" style="font-family:'IBM Plex Sans',sans-serif;">+ 8 more GCC campaigns under AED 11K each</span><span class="figs">AED <b>57,486</b> combined &middot; 0 payments</span></li>
+        </ul>
+      </div>
+      <div class="action-card scale">
+        <div class="hd">Proven winners &mdash; protect and extend</div>
+        <ul class="mono">
+          <li><span class="campaign" style="font-family:'IBM Plex Sans',sans-serif;">GEM / Master Fintech / Qatar &amp; UAE / 13/10/2025 / FB</span><span class="figs">CAC <b>AED 2,576</b> &middot; ROI <b>976%</b> &middot; 7 payments</span></li>
+          <li><span class="campaign" style="font-family:'IBM Plex Sans',sans-serif;">GEM / Masters in AI / Ghana / 15/04/2026 / FB</span><span class="figs">CAC <b>AED 393</b> &middot; ROI <b>3,637%</b> &middot; 3 payments</span></li>
+          <li><span class="campaign" style="font-family:'IBM Plex Sans',sans-serif;">EUG / MBA / Health / Zimbabwe / 20/04/2026 / FB</span><span class="figs">CAC <b>AED 476</b> &middot; ROI <b>3,446%</b> &middot; 5 payments</span></li>
+          <li><span class="campaign" style="font-family:'IBM Plex Sans',sans-serif;">GEM / Masters in AI / Kenya / 09/10/2025 / FB</span><span class="figs">CAC <b>AED 459</b> &middot; ROI <b>4,397%</b> &middot; 2 payments</span></li>
+          <li><span class="campaign" style="font-family:'IBM Plex Sans',sans-serif;">GEM / Masters In AI / South Africa / 12/12/2025 / FB</span><span class="figs">CAC <b>AED 734</b> &middot; ROI <b>2,668%</b> &middot; 4 payments</span></li>
+          <li><span class="campaign" style="font-family:'IBM Plex Sans',sans-serif;">GEM / Masters In AI / Zimbabwe / 27/04/2026 / FB</span><span class="figs">CAC <b>AED 707</b> &middot; ROI <b>2,698%</b> &middot; 4 payments</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="channel-table">
+    <div class="sechead">
+      <h2>Channel-level performance, for reference</h2>
+      <div class="sec-note">Full Global &middot; Masters picture, Jan&ndash;Aug actuals. Organic/offline rows have no spend but real payments &mdash; they set the floor this plan&rsquo;s paid spend needs to clear.</div>
+    </div>
+    <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>Channel</th><th class="num">Leads</th><th class="num">Spend (AED)</th><th class="num">CPL</th>
+        <th class="num">Payments</th><th class="num">Revenue (AED)</th><th class="num">CAC (AED)</th><th class="num">ROI</th>
+      </tr></thead>
+      <tbody class="num mono">
+        <tr><td style="font-family:'IBM Plex Sans',sans-serif;">Facebook Ads</td><td>16,172</td><td>317,050</td><td>19.6</td><td>86</td><td>1,878,918</td><td>3,687</td><td>493%</td></tr>
+        <tr><td style="font-family:'IBM Plex Sans',sans-serif;">LinkedIn Ads</td><td>1,124</td><td>22,332</td><td>19.9</td><td>8</td><td>186,471</td><td>2,791</td><td>735%</td></tr>
+        <tr><td style="font-family:'IBM Plex Sans',sans-serif;">Google Ads</td><td>642</td><td>957</td><td>1.5</td><td>2</td><td>34,889</td><td>479</td><td>3,545%</td></tr>
+        <tr><td style="font-family:'IBM Plex Sans',sans-serif;">Referral</td><td>52</td><td>&mdash;</td><td>&mdash;</td><td>13</td><td>348,181</td><td>&mdash;</td><td>&mdash;</td></tr>
+        <tr><td style="font-family:'IBM Plex Sans',sans-serif;">Other / Organic</td><td>870</td><td>&mdash;</td><td>&mdash;</td><td>26</td><td>643,243</td><td>&mdash;</td><td>&mdash;</td></tr>
+        <tr><td style="font-family:'IBM Plex Sans',sans-serif;">On-Ground / Kiosk</td><td>859</td><td>&mdash;</td><td>&mdash;</td><td>7</td><td>178,818</td><td>&mdash;</td><td>&mdash;</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section id="risks">
+    <div class="sechead"><h2>Reading these projections responsibly</h2></div>
+    <div class="risks">
+      <div class="risk"><div class="badge">1</div><div class="body"><b>Small samples move a lot.</b> Kuwait and Google Ads are each built on fewer than 6 historical payments; the new Qatar &amp; UAE LinkedIn line has no baseline at all. Their September numbers are directional, not forecasts &mdash; review actuals weekly and be ready to shift the AED 6,000 combined &ldquo;Test&rdquo; pool (Google + Qatar&amp;UAE LinkedIn) toward whichever is actually converting by week 2.</div></div>
+      <div class="risk"><div class="badge">2</div><div class="body"><b>Payments lag spend, often by months.</b> This pipeline routinely sees payments land 6&ndash;12 months after the lead was generated. September&rsquo;s admissions will include leads from campaigns run well before September &mdash; don&rsquo;t judge September&rsquo;s own campaigns by September&rsquo;s payment count alone.</div></div>
+      <div class="risk"><div class="badge">3</div><div class="body"><b>Both GCC benched rates carry risk, but Oman&rsquo;s is the softer one.</b> Qatar &amp; UAE&rsquo;s AED 50 is grounded in a real recent week (Aug 25&ndash;31 actual: AED 43.3); if that holds, AED 15,000 buys more than 300 leads. Oman&rsquo;s AED 50 has <b>no recent data behind it at all</b> &mdash; its Facebook campaign hasn&rsquo;t delivered since Aug 21, so the number is a planning assumption, not a benched rate the way Qatar &amp; UAE&rsquo;s is. Treat Oman&rsquo;s 200-lead estimate as contingent on the relaunch happening and performing near this rate; if it delivers worse, the shortfall needs covering from elsewhere in the plan, not assumed away. Track combined lead volume weekly against the 5,000 ceiling &mdash; trim Kuwait or Google first if either GCC market is running hotter than benched.</div></div>
+      <div class="risk"><div class="badge">4</div><div class="body"><b>30-payment floor now has almost no margin.</b> ~31 projected payments clears the 30 target by just 1 &mdash; down from a 4-payment cushion before this round&rsquo;s Oman/Kuwait increase and Africa trim, since GCC&rsquo;s higher-CPL/lower-ROI economics now carry a bigger share of the plan. In the downside case (Kuwait, the new Qatar &amp; UAE LinkedIn test, and Google all land at zero), the plan hits <b>exactly</b> 30 on the Africa markets, Oman, and the Africa LinkedIn line alone &mdash; no room left below that. Watch payments weekly, not just leads; if Oman&rsquo;s relaunch slips past mid-September, this floor is at real risk.</div></div>
+      <div class="risk"><div class="badge">5</div><div class="body"><b>Qatar &amp; UAE&rsquo;s focused CAC (AED 3,442) blends two winning campaigns only.</b> Real-world CAC when scaling ad budget on the same audience often drifts upward (auction saturation) &mdash; treat 4 projected payments there as an upper bound, not a floor.</div></div>
+    </div>
+  </section>
+
+  <footer class="close">
+    <span>Built from BigNxt&rsquo;s Enrollment Funnel Console &middot; Payment sheet is the source of truth for all payment/revenue figures &middot; CRM/Ads data through Aug 31, 2026</span>
+    <span>Prepared Sep 1, 2026</span>
+  </footer>
+
+</div>
+
+</body></html>
