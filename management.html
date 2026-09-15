@@ -498,7 +498,7 @@
         </div>
         <div class="card">
           <div class="card-head"><h2>By campaign</h2><button type="button" class="csv-btn" id="campaignPaymentTableGlobalCsv">Download CSV</button></div>
-          <div class="chint">Payments received in this date range (by Admission/fees-paid date), by campaign - irrespective of when the lead was originally created.</div>
+          <div class="chint">Payments received in this date range (by the Payment sheet's own Month cycle label), by campaign - irrespective of when the lead was originally created.</div>
           <div class="tablewrap"><table id="campaignPaymentTableGlobal">
             <thead><tr><th>Campaign</th><th class="num">Admissions</th><th class="num">Fee booked (AED)</th><th class="num">Payment received (AED)</th></tr></thead>
             <tbody id="campaignPaymentBodyGlobal"></tbody>
@@ -553,7 +553,7 @@
         </div>
         <div class="card">
           <div class="card-head"><h2>By campaign</h2><button type="button" class="csv-btn" id="campaignPaymentTableSaudiCsv">Download CSV</button></div>
-          <div class="chint">Payments received in this date range (by Admission/fees-paid date), by campaign - irrespective of when the lead was originally created.</div>
+          <div class="chint">Payments received in this date range (by the Payment sheet's own Month cycle label), by campaign - irrespective of when the lead was originally created.</div>
           <div class="tablewrap"><table id="campaignPaymentTableSaudi">
             <thead><tr><th>Campaign</th><th class="num">Admissions</th><th class="num">Fee booked (AED)</th><th class="num">Payment received (AED)</th></tr></thead>
             <tbody id="campaignPaymentBodySaudi"></tbody>
@@ -2369,11 +2369,18 @@ function renderSummary(){
     // status can lag or be missed entirely, which is exactly why this sheet exists. Every
     // "Admissions"/conversion/CAC figure in this tab is sourced from it, not from CRM won-status,
     // except the funnel chart below (a deliberate exception - see its own hint text).
-    // 'admission' mode (2026-09-15): Summary tracks money received IN this date range, regardless
-    // of when the underlying lead was created - the opposite question from Trends' cohort view.
-    // Matches on the sheet's Admission Date (really the fees-paid date), falling back to the old
-    // cycle-month check when that field is blank (common for Jan-Mar 2026 rows).
-    const rangePayments = ALL_PAYMENTS.filter(r => r.entity===ent && paymentMatchesDate(r,'admission') && paymentDimMatch(r));
+    // Cycle mode (reverted 2026-09-15, same day as the 'admission' experiment above): Summary
+    // tracks money received IN this date range using the Payment sheet's own Month column as the
+    // source of truth, not the separate Admission Date field - trying to reconcile the two exposed
+    // real seams where finance's Month label and the exact Admission Date disagree at cycle
+    // boundaries (a payment made Aug 1-5 still labeled "July" under the old 6th-to-5th cycle, for
+    // example), which read as bugs ("last month should be 11/26, dashboard shows 13/25") even
+    // though each individual number was internally consistent. The user's own instruction: "payment
+    // sheet will have month and take month payment from that sheet only" - trust the sheet's Month
+    // column, don't second-guess it against Admission Date. This is still the opposite question
+    // from Trends' lead-cohort view (money received in this range, regardless of when the lead was
+    // created), just answered via the Month label instead of a derived exact date.
+    const rangePayments = ALL_PAYMENTS.filter(r => r.entity===ent && paymentMatchesDate(r) && paymentDimMatch(r));
 
     const totalLeads = rangeCRM.reduce((s,r)=>s+r.leads,0);
     const totalWon = rangePayments.reduce((s,r)=>s+r.admissions,0);
@@ -2400,7 +2407,7 @@ function renderSummary(){
       <div class="tile"><div class="tlabel">${t.label}</div><div class="tvalue num">${t.value}</div></div>`).join('');
 
     document.getElementById('summaryFunnelHint'+ent).textContent =
-      `${fmtInt(totalLeads)} ${ent} leads in this date range (Degree/University/Program/Channel/Country/Region filters applied if set). Admission figure and the Meeting Done/Application "to Payment" rates are Payment-sheet sourced, tracked by Admission (fees-paid) date - money received in this window, regardless of when the lead was created; earlier stages are CRM status.`;
+      `${fmtInt(totalLeads)} ${ent} leads in this date range (Degree/University/Program/Channel/Country/Region filters applied if set). Admission figure and the Meeting Done/Application "to Payment" rates are Payment-sheet sourced, using the sheet's own Month cycle label directly - money received in this cycle, regardless of when the lead was created; earlier stages are CRM status.`;
     renderFunnel(document.getElementById('summaryFunnelChart'+ent), funnelBuckets(rangeCRM, totalWon));
     renderFunnelConv(document.getElementById('summaryFunnelConv'+ent), funnelConversions(rangeCRM, totalWon));
     renderMix(document.getElementById('summaryMixChart'+ent), channelMix(rangeCRM));
@@ -2421,7 +2428,7 @@ function renderSummary(){
     ];
     document.getElementById('kpiRowPayment'+ent).innerHTML = paymentTiles.map(t=>`
       <div class="tile"><div class="tlabel">${t.label}</div><div class="tvalue num">${t.value}</div></div>`).join('');
-    let paymentHint = `Payment sheet is the source of truth for Admissions/Revenue/ROI/ROAS throughout this report, not CRM Admission Done status. This tab tracks money received in the selected date range by its Admission (fees-paid) date, irrespective of when the underlying lead was created - a payment with no Admission Date on file (common for Jan&ndash;Mar 2026 rows) falls back to its payment-cycle month instead (the "August" cycle runs 6 Aug&ndash;5 Sep, not the calendar month) so it still appears somewhere rather than vanishing from every date-filtered view. Course fee booked standardized to AED (AED/USD/SAR are all fixed-peg currencies).`;
+    let paymentHint = `Payment sheet is the source of truth for Admissions/Revenue/ROI/ROAS throughout this report, not CRM Admission Done status. This tab tracks money received in the selected date range by the sheet's own Month cycle label (finance's own determination of which cycle a payment belongs to), irrespective of when the underlying lead was created. Course fee booked standardized to AED (AED/USD/SAR are all fixed-peg currencies).`;
     if(anomalyRows>0) paymentHint += ` ${anomalyRows} row${anomalyRows===1?'':'s'} in this range had a Fee Booked value that looked like a payment-method note rather than an amount (source data-entry issue) and ${anomalyRows===1?'was':'were'} excluded from the fee/ROI totals above.`;
     document.getElementById('paymentHint'+ent).innerHTML = paymentHint;
   });
