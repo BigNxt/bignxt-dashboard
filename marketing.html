@@ -633,20 +633,21 @@
     </div>
     <div class="card" style="margin-top:14px;">
       <div class="card-head"><h2>Saudi BDE performance by campaign</h2><button type="button" class="csv-btn" id="bdeCampaignTableSaudiCsv">Download CSV</button></div>
-      <div class="chint">Saudi only: the same funnel metrics as the table above, split by campaign as well as BDE, so you can see how many leads each BDE received from a specific campaign and how those leads progressed. CRM-status based (Leads through Lead&rarr;Application) &mdash; Admissions/Lead&rarr;Payment aren&rsquo;t shown here since the Payment sheet&rsquo;s BDE-name match has no reliable campaign dimension to split by.</div>
+      <div class="chint">Saudi only: how many leads each BDE received from a specific campaign, and the exact count currently sitting at each funnel stage (not a rate) &mdash; Call Back through Application are CRM-status based; Payments is Payment-sheet sourced, joined by BDE name (same conservative match used elsewhere in this tab) and the payment&rsquo;s own campaign field.</div>
       <div class="tablewrap"><table id="bdeCampaignTableSaudi">
         <thead><tr>
           <th data-key="owner">BDE<span class="arrow">&#9662;</span></th>
           <th data-key="campaign">Campaign<span class="arrow">&#9662;</span></th>
           <th class="num" data-key="leads">Leads<span class="arrow">&#9662;</span></th>
-          <th class="num" data-key="untouchedPct">Untouched&nbsp;%<span class="arrow">&#9662;</span></th>
-          <th class="num" data-key="leadToCallBack">Lead&rarr;Call&nbsp;Back<span class="arrow">&#9662;</span></th>
-          <th class="num" data-key="leadToRecontactable">Lead&rarr;Recontactable<span class="arrow">&#9662;</span></th>
-          <th class="num" data-key="leadToProspect">Lead&rarr;Prospect<span class="arrow">&#9662;</span></th>
-          <th class="num" data-key="leadToHotProspect">Lead&rarr;Hot&nbsp;Prospect<span class="arrow">&#9662;</span></th>
-          <th class="num" data-key="leadToMeetingScheduled">Lead&rarr;Mtg&nbsp;Scheduled<span class="arrow">&#9662;</span></th>
-          <th class="num" data-key="leadToMeetingDone">Lead&rarr;Mtg&nbsp;Done<span class="arrow">&#9662;</span></th>
-          <th class="num" data-key="leadToApplication">Lead&rarr;App<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="untouched">Untouched<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="callBack">Call&nbsp;Back<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="recontactable">Recontactable<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="prospect">Prospect<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="hotProspect">Hot&nbsp;Prospect<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="meetingScheduled">Mtg&nbsp;Scheduled<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="meetingDone">Mtg&nbsp;Done<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="application">Application<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="payments">Payments<span class="arrow">&#9662;</span></th>
         </tr></thead>
         <tbody id="bdeCampaignBodySaudi"></tbody>
       </table></div>
@@ -2667,15 +2668,29 @@ function renderBdeEntityPanel(entityValue, sortState, paymentAdm){
   updateSortArrows('bdeTable'+entityValue, sortState);
 }
 
+// Payment-sheet admissions by (matched CRM owner, campaign), Saudi only - mirrors
+// computePaymentAdmissionsByOwner() exactly (same date/dim filters, same conservative
+// matchPaymentBdeToOwner matching) but keys by owner+campaign instead of owner alone, since
+// payment_agg.json already carries a real `campaign` field per row (not fabricated - it's the
+// same campaign-name join paymentFeeByCampaign() already uses elsewhere). Added 2026-09-16 after
+// initially omitting this column - re-added per direct user request, joined the same way the rest
+// of this dashboard already trusts for BDE-level admissions.
+function computePaymentAdmissionsByOwnerCampaign(){
+  const rangePayments = ALL_PAYMENTS.filter(r => r.entity==='Saudi' && paymentMatchesDate(r) && paymentDimMatch(r));
+  const byOwnerCampaign = new Map();
+  for(const r of rangePayments){
+    const owner = matchPaymentBdeToOwner(r.bde, ALL_BDE_OWNERS);
+    if(!owner) continue; // unmatched names are already surfaced at the owner-level tab above; can't honestly credit a specific campaign here
+    const k = owner+'|||'+r.campaign;
+    byOwnerCampaign.set(k, (byOwnerCampaign.get(k)||0) + r.admissions);
+  }
+  return byOwnerCampaign;
+}
+
 // BDE x Campaign breakdown, Saudi only (2026-09-16, user request: "how many leads each BDE
-// received per campaign with that campaign name and its campaign metrics"). Same CRM-status
-// funnel-conversion columns as the owner-level leaderboard above (Leads/Untouched/Lead->stage
-// rates), just split by campaign as well as owner. Deliberately does NOT include Admissions/
-// Lead->Payment: the Payment sheet's BDE-name join (matchPaymentBdeToOwner) has no campaign
-// dimension to split by, and guessing one would risk crediting a real payment to the wrong
-// campaign - the same reasoning that already keeps BDE Performance's own admissions join
-// conservative elsewhere in this file.
-function bdeCampaignLeaderboard(rows){
+// received per campaign with that campaign name and its campaign metrics"; refined same day to
+// show raw counts per stage rather than Lead->stage rates, and to include Payments/admissions).
+function bdeCampaignLeaderboard(rows, paymentByOwnerCampaign){
   const map = new Map();
   for(const r of rows){
     const k = r.owner+'|||'+r.campaign;
@@ -2685,12 +2700,13 @@ function bdeCampaignLeaderboard(rows){
   }
   return Array.from(map.values()).map(o=>{
     const conv = funnelConversions(o.rows);
+    const k = o.owner+'|||'+o.campaign;
     return {
-      owner:o.owner, campaign:o.campaign, leads:o.leads,
-      untouchedPct: o.leads>0 ? o.untouched/o.leads*100 : null,
-      leadToCallBack: conv[0].pct, leadToRecontactable: conv[1].pct,
-      leadToProspect: conv[2].pct, leadToHotProspect: conv[3].pct,
-      leadToMeetingScheduled: conv[4].pct, leadToMeetingDone: conv[5].pct, leadToApplication: conv[6].pct
+      owner:o.owner, campaign:o.campaign, leads:o.leads, untouched:o.untouched,
+      callBack: conv[0].num, recontactable: conv[1].num,
+      prospect: conv[2].num, hotProspect: conv[3].num,
+      meetingScheduled: conv[4].num, meetingDone: conv[5].num, application: conv[6].num,
+      payments: paymentByOwnerCampaign.get(k) || 0
     };
   }).sort((a,b)=>b.leads-a.leads);
 }
@@ -2699,23 +2715,24 @@ const bdeCampaignState = { key:'leads', dir:'desc' };
 function renderBdeCampaignTable(){
   const rangeBde = ALL_BDE.filter(r => OWNER_PRIMARY_ENTITY[r.owner]==='Saudi' && matchesDate(r) && degreeChannelMatch(r)
     && (state.bdeOwners.length===0 || state.bdeOwners.includes(r.owner)));
-  const list = bdeCampaignLeaderboard(rangeBde);
+  const paymentByOwnerCampaign = computePaymentAdmissionsByOwnerCampaign();
+  const list = bdeCampaignLeaderboard(rangeBde, paymentByOwnerCampaign);
   const sorted = sortByState(list, bdeCampaignState);
-  const pctOrDash = v => v!=null ? fmtPct(v) : '<span class="dash">'+EMDASH+'</span>';
   document.getElementById('bdeCampaignBodySaudi').innerHTML = sorted.map(o=>`
     <tr>
       <td>${o.owner}</td>
       <td>${o.campaign}</td>
       <td class="num">${fmtInt(o.leads)}</td>
-      <td class="num">${pctOrDash(o.untouchedPct)}</td>
-      <td class="num">${pctOrDash(o.leadToCallBack)}</td>
-      <td class="num">${pctOrDash(o.leadToRecontactable)}</td>
-      <td class="num">${pctOrDash(o.leadToProspect)}</td>
-      <td class="num">${pctOrDash(o.leadToHotProspect)}</td>
-      <td class="num">${pctOrDash(o.leadToMeetingScheduled)}</td>
-      <td class="num">${pctOrDash(o.leadToMeetingDone)}</td>
-      <td class="num">${pctOrDash(o.leadToApplication)}</td>
-    </tr>`).join('') || '<tr><td colspan="10" class="empty-state">No BDE/campaign data for this selection.</td></tr>';
+      <td class="num">${fmtInt(o.untouched)}</td>
+      <td class="num">${fmtInt(o.callBack)}</td>
+      <td class="num">${fmtInt(o.recontactable)}</td>
+      <td class="num">${fmtInt(o.prospect)}</td>
+      <td class="num">${fmtInt(o.hotProspect)}</td>
+      <td class="num">${fmtInt(o.meetingScheduled)}</td>
+      <td class="num">${fmtInt(o.meetingDone)}</td>
+      <td class="num">${fmtInt(o.application)}</td>
+      <td class="num">${fmtInt(o.payments)}</td>
+    </tr>`).join('') || '<tr><td colspan="11" class="empty-state">No BDE/campaign data for this selection.</td></tr>';
   updateSortArrows('bdeCampaignTableSaudi', bdeCampaignState);
 }
 
