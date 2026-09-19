@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Master of Artificial Intelligence &amp; Applied Data Science | GEM Alpine Business School</title>
+<meta name="description" content="A 12-month, 90-ECTS online Master's in Artificial Intelligence &amp; Applied Data Science from GEM Alpine Business School (formerly Grenoble École de Management). Transform data, lead with AI.">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Master of Artificial Intelligence &amp; Applied Data Science | GEM Alpine Business School">
+<meta property="og:description" content="Transform data, lead with AI. 12 months · 90 ECTS · 100% online.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap">
+<style>
+/* ==========================================================================
+   GEM ALPINE BUSINESS SCHOOL — landing page palette
+   Colours and type sampled directly from the live site (grenoble-em.com,
+   Sept 2026): wordmark/heading teal #003649, secondary dark teal #1A4A5B,
+   primary action blue #004BFF, accent yellow #EBF155, body ink #16151D,
+   Montserrat throughout, square (0-radius) buttons and bars. Swap in the
+   licensed logo file and re-confirm exact values with GEM brand/legal
+   before this goes live — this is a best-effort match, not the official
+   asset kit.
+   ========================================================================== */
+:root{
+  --teal:      #003649;
+  --teal-700:  #1A4A5B;
+  --teal-050:  #E9EEF0;
+  --blue:      #004BFF;
+  --blue-600:  #0038BF;
+  --blue-050:  #E6EDFF;
+  --yellow:    #EBF155;
+  --yellow-ink:#585C10;
+  --ink:       #16151D;
+  --body:      #454A56;
+  --muted:     #6B7280;
+  --line:      #E5E7EB;
+  --surface:   #FFFFFF;
+  --surface-alt: #F6F7F9;
+  --ok:        #298530;  --ok-bg:  #E7F4E8;
+
+  --f: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  --container: 1200px;
+  --r: 2px;
+  --sh-1: 0 1px 3px rgba(16,21,29,.08);
+  --sh-2: 0 18px 44px -18px rgba(16,21,29,.35);
+  --dur: 180ms; --ease: cubic-bezier(.2,.7,.3,1);
+  --header-h: 76px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important} }
+body{margin:0;background:var(--surface);color:var(--body);font-family:var(--f);font-size:1rem;line-height:1.65;-webkit-font-smoothing:antialiased}
+img,svg{max-width:100%;height:auto;display:block}
+a{color:var(--blue);text-underline-offset:2px}
+a:hover{color:var(--blue-600)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+h1,h2,h3,h4{font-family:var(--f);color:var(--ink);line-height:1.18;margin:0 0 1rem;font-weight:700}
+h1{font-size:2.6rem}
+h2{font-size:1.85rem}
+h3{font-size:1.4rem}
+h4{font-size:1.1rem}
+p{margin:0 0 1rem;max-width:68ch}
+ul{margin:0 0 1rem;padding-left:1.2em}
+@media (max-width:640px){ h1{font-size:2rem} h2{font-size:1.5rem} }
+
+.container{width:100%;max-width:var(--container);margin-inline:auto;padding-inline:1.25rem}
+@media (min-width:900px){ .container{padding-inline:2rem} }
+.section{padding-block:3.5rem}
+@media (min-width:900px){ .section{padding-block:5rem} }
+.section--alt{background:var(--surface-alt)}
+.section--teal{background:linear-gradient(165deg,var(--teal),var(--teal-700));color:#C9D6DA}
+.section--teal h1,.section--teal h2,.section--teal h3{color:#fff}
+.u-center{text-align:center;margin-inline:auto}
+.u-muted{color:var(--muted)}
+.u-small{font-size:.85rem}
+.u-lead{font-size:1.15rem;color:var(--body)}
+.u-mt-6{margin-top:2rem} .u-mt-7{margin-top:2.5rem} .u-mt-8{margin-top:3rem}
+.u-mb-0{margin-bottom:0}
+
+.grid{display:grid;gap:1.5rem}
+.grid--2{grid-template-columns:1fr}
+.grid--3{grid-template-columns:1fr}
+.grid--4{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:760px){ .grid--2{grid-template-columns:repeat(2,minmax(0,1fr))} .grid--3{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (min-width:1000px){ .grid--4{grid-template-columns:repeat(4,minmax(0,1fr))} }
+.grid > *{min-width:0}
+
+.eyebrow{font-family:var(--f);font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);margin:0 0 .6rem}
+.section--teal .eyebrow{color:var(--yellow)}
+.sec-head{margin-bottom:2.5rem;max-width:62ch}
+.sec-head p{color:var(--muted);font-size:1.05rem;margin-bottom:0}
+.section--teal .sec-head p{color:#B9C9CE}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font-family:var(--f);font-size:.92rem;font-weight:700;line-height:1;text-decoration:none;cursor:pointer;padding:.95rem 1.7rem;min-height:48px;border-radius:var(--r);border:1.5px solid transparent;transition:background var(--dur) var(--ease),border-color var(--dur) var(--ease),color var(--dur) var(--ease);white-space:nowrap}
+.btn--blue{background:var(--blue);color:#fff}
+.btn--blue:hover{background:var(--blue-600);color:#fff}
+.btn--yellow{background:var(--yellow);color:var(--teal)}
+.btn--yellow:hover{background:#dee54a;color:var(--teal)}
+.btn--outline{background:transparent;color:var(--teal);border-color:var(--line)}
+.btn--outline:hover{background:var(--teal-050);border-color:var(--teal)}
+.btn--on-dark{background:transparent;color:#fff;border-color:rgba(255,255,255,.4)}
+.btn--on-dark:hover{background:rgba(255,255,255,.12)}
+.btn--block{width:100%}
+.btn-row{display:flex;flex-wrap:wrap;gap:.75rem}
+
+.badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:700;letter-spacing:.03em;padding:.32rem .7rem;border-radius:var(--r);background:var(--blue-050);color:var(--blue-600)}
+.badge--on-dark{background:rgba(255,255,255,.14);color:#fff}
+
+.spec-strip{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.18);border-radius:var(--r);overflow:hidden}
+@media (min-width:760px){ .spec-strip{grid-template-columns:repeat(4,1fr)} }
+.spec-strip__item{background:rgba(255,255,255,.05);padding:1.1rem 1.1rem 1.3rem}
+.spec-strip__label{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9CB3BA;margin:0 0 .4rem}
+.spec-strip__value{font-size:1.25rem;font-weight:700;color:#fff;line-height:1.15;margin:0}
+.spec-strip__note{font-size:.72rem;color:#9CB3BA;margin:.25rem 0 0}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1.5rem;display:flex;flex-direction:column;gap:.6rem;transition:box-shadow var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+.card:hover{box-shadow:var(--sh-1)}
+.card__meta{font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue)}
+.card__title{font-size:1.15rem;font-weight:700;color:var(--ink);margin:0;line-height:1.3}
+.card__body{font-size:.9rem;color:var(--body);margin:0}
+
+.stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+@media (min-width:760px){ .stat-row{grid-template-columns:repeat(4,1fr)} }
+.stat{background:var(--surface);padding:1.5rem 1.25rem;text-align:left}
+.stat__value{font-size:1.9rem;font-weight:800;color:var(--teal);line-height:1;margin:0 0 .5rem}
+.stat__label{font-size:.78rem;color:var(--muted);margin:0;line-height:1.45}
+
+.accred-strip{display:flex;flex-wrap:wrap;gap:.75rem;align-items:stretch}
+.accred{display:flex;align-items:center;gap:.75rem;border:1px solid var(--line);border-radius:var(--r);padding:.75rem 1rem;background:var(--surface);flex:1 1 220px}
+.accred__mark{width:44px;height:44px;border-radius:var(--r);background:var(--teal-050);border:1px solid var(--line);flex:none;display:grid;place-items:center;font-size:.6rem;font-weight:700;color:var(--teal);letter-spacing:.02em}
+.accred__name{font-size:.82rem;font-weight:700;color:var(--ink);line-height:1.3}
+.accred__note{font-size:.72rem;color:var(--muted)}
+
+.acc{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.acc details{border-bottom:1px solid var(--line)}
+.acc details:last-child{border-bottom:none}
+.acc summary{cursor:pointer;list-style:none;padding:1.1rem 1.4rem;font-weight:600;font-size:.95rem;color:var(--ink);display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary::after{content:"+";font-size:1.3rem;color:var(--blue);flex:none}
+.acc details[open] summary::after{content:"–"}
+.acc summary:hover{background:var(--surface-alt)}
+.acc__panel{padding:0 1.4rem 1.4rem;font-size:.92rem}
+.acc__panel p:last-child{margin-bottom:0}
+.acc__tag{font-size:.68rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+
+.lp-check-list{list-style:none;margin:0;padding:0;display:grid;gap:.85rem}
+.lp-check-list li{display:flex;gap:.75rem;align-items:flex-start;max-width:none}
+.lp-check-list li::before{content:"";flex:none;width:20px;height:20px;margin-top:2px;border-radius:50%;background:var(--blue-050);border:1.5px solid var(--blue);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23004BFF' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.7'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;background-size:10px}
+
+.imgslot{position:relative;display:grid;place-items:center;text-align:center;background:repeating-linear-gradient(135deg, rgba(255,255,255,.06) 0 12px, rgba(255,255,255,.02) 12px 24px);border:1.5px dashed rgba(255,255,255,.3);border-radius:var(--r);color:#B9C9CE;padding:1.5rem;overflow:hidden}
+.imgslot__label{font-size:.75rem;line-height:1.6;max-width:90%}
+.imgslot__label b{display:block;color:#fff;font-size:.82rem;margin-bottom:4px}
+.imgslot--wide{aspect-ratio:16/8}
+
+/* --- Form --- */
+.form{display:grid;gap:1rem}
+.form[hidden]{display:none}
+.field{display:grid;gap:.4rem}
+.field label{font-size:.8rem;font-weight:700;color:var(--ink)}
+.input,.select{width:100%;font-family:var(--f);font-size:.92rem;color:var(--ink);padding:.8rem .9rem;min-height:48px;border:1.5px solid var(--line);border-radius:var(--r);background:var(--surface);transition:border-color var(--dur) var(--ease)}
+.input:focus,.select:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 3px var(--blue-050)}
+.input::placeholder{color:var(--muted)}
+.phone-group{display:grid;grid-template-columns:96px 1fr;gap:.5rem}
+.consent{display:flex;gap:.75rem;align-items:flex-start;font-size:.75rem;color:var(--muted);line-height:1.5}
+.consent input{margin-top:3px;width:18px;height:18px;flex:none;accent-color:var(--blue)}
+.alert{display:flex;gap:.75rem;align-items:flex-start;padding:1rem 1.2rem;border-radius:var(--r);font-size:.9rem;border:1px solid transparent}
+.alert--success{background:var(--ok-bg);border-color:#C9E4CB;color:var(--ok)}
+.alert b{display:block;margin-bottom:2px}
+
+.lead-panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh-2);overflow:hidden}
+.lead-panel__head{background:var(--teal);color:#fff;padding:1.5rem}
+.lead-panel__head h3{color:#fff;font-size:1.2rem;margin:0 0 .4rem}
+.lead-panel__head p{color:#AEC2C8;font-size:.82rem;margin:0}
+.lead-panel__body{padding:1.5rem}
+.lead-panel__foot{padding:1rem 1.5rem;background:var(--surface-alt);border-top:1px solid var(--line);font-size:.72rem;color:var(--muted)}
+
+/* --- Header / footer --- */
+.site-header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.site-header .container{display:flex;align-items:center;gap:1rem;min-height:var(--header-h)}
+.gem-wordmark{display:flex;align-items:baseline;gap:.5rem;line-height:1;text-decoration:none;flex:none}
+.gem-wordmark .gem-g{font-weight:800;font-size:1.7rem;color:var(--teal);letter-spacing:.01em}
+.gem-wordmark .gem-sub{font-weight:700;font-size:.68rem;letter-spacing:.02em;color:var(--teal);line-height:1.25;text-transform:none;max-width:6em}
+.header-actions{margin-inline-start:auto}
+
+.site-footer{background:var(--teal);color:#9FB4B9;font-size:.85rem;padding-block:3rem 2rem}
+.site-footer .gem-wordmark .gem-g,.site-footer .gem-wordmark .gem-sub{color:#fff}
+.site-footer a{color:#9FB4B9;text-decoration:none}
+.site-footer a:hover{color:#fff}
+.footer-legal{margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.14);display:flex;flex-wrap:wrap;gap:.75rem 1.5rem;justify-content:space-between;font-size:.75rem}
+.partner-disclosure{margin-top:1.75rem;padding-top:1.75rem;border-top:1px solid rgba(255,255,255,.14);font-size:.8rem;color:#8CA2A7;max-width:60ch}
+.partner-disclosure b{color:#C5D5D9}
+
+.sticky-cta{position:fixed;inset-inline:0;bottom:0;z-index:90;background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -4px 20px rgba(16,21,29,.12);padding:.75rem 1rem;padding-bottom:calc(.75rem + env(safe-area-inset-bottom,0px))}
+@media (min-width:1000px){ .sticky-cta{display:none} }
+
+#lp-hero-grid{grid-template-columns:1fr}
+@media (min-width:1000px){
+  #lp-hero-grid{grid-template-columns:minmax(0,1fr) 400px;align-items:start;gap:3rem}
+  .lp-form-rail{position:sticky;top:calc(var(--header-h) + 1.5rem)}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a class="gem-wordmark" href="#top" aria-label="GEM Alpine Business School — home">
+      <span class="gem-g">GEM</span>
+      <span class="gem-sub">Alpine<br>Business<br>School</span>
+    </a>
+    <div class="header-actions">
+      <a class="btn btn--blue" href="#lead-form">Request the brochure</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ============================ HERO + LEAD FORM ============================ -->
+<section class="section--teal" style="padding-block:3.5rem">
+  <div class="container">
+    <div class="grid" id="lp-hero-grid">
+      <div>
+        <span class="badge badge--on-dark">Applications open</span>
+        <h1 style="color:#fff;margin-top:1rem">Master of Artificial Intelligence &amp; Applied Data Science</h1>
+        <p style="color:var(--yellow);font-weight:700;font-size:1.1rem;letter-spacing:.01em;margin-bottom:1.25rem">Transform Data, Lead with AI.</p>
+        <p class="u-lead" style="max-width:58ch;color:#C9D6DA">A 12-month, 90-ECTS online master's from GEM Alpine Business School (formerly Grenoble École de Management) — for engineers, IT professionals and career switchers ready to move into artificial intelligence and data science.</p>
+
+        <div class="spec-strip u-mt-7">
+          <div class="spec-strip__item"><p class="spec-strip__label">Duration</p><p class="spec-strip__value">12 months</p><p class="spec-strip__note">Live weekly sessions + LMS</p></div>
+          <div class="spec-strip__item"><p class="spec-strip__label">Credits</p><p class="spec-strip__value">90 ECTS</p><p class="spec-strip__note">EQF Level 7</p></div>
+          <div class="spec-strip__item"><p class="spec-strip__label">Format</p><p class="spec-strip__value">100% online</p><p class="spec-strip__note">Synchronous + asynchronous</p></div>
+          <div class="spec-strip__item"><p class="spec-strip__label">University status</p><p class="spec-strip__value" style="font-size:1.05rem">Triple-accredited</p><p class="spec-strip__note">AMBA · AACSB · EQUIS</p></div>
+        </div>
+
+        <div class="imgslot imgslot--wide u-mt-7">
+          <p class="imgslot__label"><b>Hero image to supply</b>A confident professional working with data/AI visuals on screen — studio portrait with a subtle chart/network overlay, per GEM's imagery style. 1600×800, WebP.</p>
+        </div>
+      </div>
+
+      <aside class="lp-form-rail">
+        <div class="lead-panel">
+          <div class="lead-panel__head">
+            <h3>Get the full programme brochure</h3>
+            <p>Curriculum, fees and the next intake date.</p>
+          </div>
+          <div class="lead-panel__body">
+            <form class="form lead-form" id="lead-form" novalidate>
+              <input type="hidden" name="programme" value="Master of Artificial Intelligence & Applied Data Science — GEM Alpine Business School">
+              <input type="hidden" name="page_url">
+              <input type="hidden" name="utm_source"><input type="hidden" name="utm_medium">
+              <input type="hidden" name="utm_campaign"><input type="hidden" name="utm_content">
+              <input type="hidden" name="gclid"><input type="hidden" name="fbclid">
+
+              <div class="field">
+                <label for="lf-name">Full name</label>
+                <input class="input" id="lf-name" name="full_name" type="text" autocomplete="name" placeholder="Your full name" required>
+              </div>
+              <div class="field">
+                <label for="lf-email">Email address</label>
+                <input class="input" id="lf-email" name="email" type="email" autocomplete="email" placeholder="you@company.com" required>
+              </div>
+              <div class="field">
+                <label for="lf-phone">Phone number</label>
+                <div class="phone-group">
+                  <select class="select" name="phone_code" aria-label="Country code" required>
+                    <option value="+971">+971</option>
+                    <option value="+966">+966</option>
+                    <option value="+965">+965</option>
+                    <option value="+968">+968</option>
+                    <option value="+234">+234</option>
+                    <option value="+33">+33</option>
+                    <option value="+44">+44</option>
+                    <option value="other">Other</option>
+                  </select>
+                  <input class="input" id="lf-phone" name="phone" type="tel" autocomplete="tel" placeholder="Mobile number" pattern="[0-9 ]{6,15}" required>
+                </div>
+              </div>
+              <div class="field">
+                <label for="lf-title">Current job title</label>
+                <input class="input" id="lf-title" name="job_title" type="text" placeholder="e.g. Software Engineer, IT Analyst" required>
+              </div>
+              <div class="field">
+                <label for="lf-exp">Work experience</label>
+                <select class="select" id="lf-exp" name="work_experience" required>
+                  <option value="" disabled selected>Select a range</option>
+                  <option value="none">No work experience yet</option>
+                  <option value="lt1">Less than 1 year</option>
+                  <option value="1-3">1–3 years</option>
+                  <option value="4-7">4–7 years</option>
+                  <option value="8plus">8+ years</option>
+                </select>
+              </div>
+
+              <label class="consent">
+                <input type="checkbox" name="consent" required>
+                <span>I agree to be contacted about this programme by phone, email and WhatsApp.</span>
+              </label>
+
+              <button class="btn btn--blue btn--block" type="submit">Send me the brochure</button>
+            </form>
+            <div class="alert alert--success lead-thanks" role="status" hidden>
+              <span aria-hidden="true">✓</span>
+              <div><b>Thank you — your details are in.</b> An admissions advisor will contact you within one working day.</div>
+            </div>
+          </div>
+          <div class="lead-panel__foot">No fee to apply. Your information is used only to process this enquiry and is never sold to third parties.</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ SCHOOL TRUST STATS ============================ -->
+<section class="section">
+  <div class="container">
+    <div class="sec-head u-center">
+      <p class="eyebrow" style="justify-content:center">GEM, academic excellence to act in a world in transition</p>
+      <p class="u-lead u-center" style="max-width:70ch">GEM is an international management school, triple-accredited and a Société à Mission institution. It combines academic excellence, impact-driven research and immersive learning to educate professionals able to act with clarity in a changing world.</p>
+    </div>
+    <div class="stat-row">
+      <div class="stat u-center"><p class="stat__value">6,000</p><p class="stat__label">students</p></div>
+      <div class="stat u-center"><p class="stat__value">130</p><p class="stat__label">nationalities</p></div>
+      <div class="stat u-center"><p class="stat__value">50</p><p class="stat__label">programs</p></div>
+      <div class="stat u-center"><p class="stat__value">50,000</p><p class="stat__label">graduates</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TRUST / ACCREDITATION ============================ -->
+<section class="section section--alt">
+  <div class="container">
+    <div class="sec-head">
+      <p class="eyebrow">Why GEM Alpine Business School</p>
+      <h2>A French grande école ranked among Europe's best</h2>
+      <p>Founded in 1984 and based in Grenoble, France — often called the "Silicon Valley of Europe" — GEM Alpine Business School (formerly Grenoble École de Management) is a member of the Conférence des Grandes Ecoles (CGE) and the Conférence des Directeurs d'Écoles Françaises de Management (CDEFM). Its programmes are delivered under university accreditation standards aligned with AACSB and EQUIS.</p>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat"><p class="stat__value">&lt;1%</p><p class="stat__label">of business schools worldwide hold the Triple Crown of accreditation (AMBA, AACSB, EQUIS) — GEM Alpine Business School is one of them</p></div>
+      <div class="stat"><p class="stat__value">Top 8</p><p class="stat__label">France — Financial Times European Business School Ranking 2025</p></div>
+      <div class="stat"><p class="stat__value">Top 24</p><p class="stat__label">Europe — Financial Times European Business School Ranking 2025</p></div>
+      <div class="stat"><p class="stat__value">Top 200</p><p class="stat__label">World — QS Rankings by Subject 2025, Business &amp; Management Studies</p></div>
+    </div>
+
+    <div class="accred-strip u-mt-7">
+      <div class="accred"><span class="accred__mark">AMBA</span><div><div class="accred__name">AMBA</div><div class="accred__note">MBA-level programme &amp; degree quality</div></div></div>
+      <div class="accred"><span class="accred__mark">AACSB</span><div><div class="accred__name">AACSB</div><div class="accred__note">Curriculum &amp; continuous improvement</div></div></div>
+      <div class="accred"><span class="accred__mark">EQUIS</span><div><div class="accred__name">EQUIS</div><div class="accred__note">Overall institutional processes</div></div></div>
+    </div>
+    <p class="u-small u-muted u-mt-5 u-mb-0">Accreditation is held by the school. Ranking figures shown are school- and subject-level as published by the Financial Times and QS.</p>
+  </div>
+</section>
+
+<!-- ============================ WHO IT'S FOR ============================ -->
+<section class="section">
+  <div class="container">
+    <div class="sec-head">
+      <p class="eyebrow">Who this master's is for</p>
+      <h2>Built for a credible pivot into AI</h2>
+    </div>
+    <ul class="lp-check-list grid grid--2" style="row-gap:1rem">
+      <li>Engineers and computer science graduates ready to specialise in AI and applied data science.</li>
+      <li>IT and software professionals expanding into machine learning, analytics and cloud AI systems.</li>
+      <li>Non-technical professionals seeking a structured, credible pivot into AI — Python and applied AI tools are taught from the ground up; prior coding experience is not required for admission.</li>
+      <li>Working professionals who want a postgraduate-level qualification (EQF Level 7), not a shortcut — plan for 4–6 hours a day alongside live weekend sessions.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================ CURRICULUM ============================ -->
+<section class="section section--alt" id="curriculum">
+  <div class="container">
+    <div class="sec-head">
+      <p class="eyebrow">Curriculum</p>
+      <h2>What you'll study</h2>
+      <p>Structured weekly modules with live Friday/Saturday sessions, plus LMS-based independent study, simulations and case labs across the 12 months.</p>
+    </div>
+    <div class="acc">
+      <details open><summary>Foundations <span class="acc__tag">Core</span></summary>
+        <div class="acc__panel"><p>Python Programming &middot; Statistics &middot; Data Analysis &amp; Visualisation.</p></div></details>
+      <details><summary>Applied AI &amp; Machine Learning <span class="acc__tag">Core</span></summary>
+        <div class="acc__panel"><p>Applied AI &middot; Machine Learning &amp; Deep Learning.</p></div></details>
+      <details><summary>Responsible &amp; Scalable AI <span class="acc__tag">Core</span></summary>
+        <div class="acc__panel"><p>Responsible AI, Data Governance &amp; Cybersecurity &middot; Big Data &amp; Cloud-based AI Systems.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CAREER OUTCOMES ============================ -->
+<section class="section">
+  <div class="container">
+    <div class="sec-head">
+      <p class="eyebrow">Where graduates head next</p>
+      <h2>Career paths this degree is built for</h2>
+      <p>Roles alumni of this programme are positioned for. Actual outcomes depend on individual experience, market conditions and performance — not guaranteed by the degree alone.</p>
+    </div>
+    <div class="grid grid--3">
+      <div class="card"><h4 class="card__title">AI Specialist</h4></div>
+      <div class="card"><h4 class="card__title">Data Scientist / ML Engineer</h4></div>
+      <div class="card"><h4 class="card__title">Business Intelligence Analyst</h4></div>
+      <div class="card"><h4 class="card__title">Big Data Engineer / Cloud AI Architect</h4></div>
+      <div class="card"><h4 class="card__title">Research Scientist</h4></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ APPLICATION PROCESS ============================ -->
+<section class="section section--alt" id="apply">
+  <div class="container">
+    <div class="sec-head">
+      <p class="eyebrow">How to apply</p>
+      <h2>Five steps to your admission offer</h2>
+    </div>
+    <div class="grid grid--4">
+      <div class="card"><p class="card__meta">Step 1</p><h4 class="card__title" style="font-size:1.05rem">Submit your application</h4><p class="card__body">Application form plus required documents.</p></div>
+      <div class="card"><p class="card__meta">Step 2</p><h4 class="card__title" style="font-size:1.05rem">Document verification</h4><p class="card__body">The admissions team checks everything you send.</p></div>
+      <div class="card"><p class="card__meta">Step 3</p><h4 class="card__title" style="font-size:1.05rem">Provisional offer</h4><p class="card__body">Accept your provisional offer letter.</p></div>
+      <div class="card"><p class="card__meta">Step 4 &amp; 5</p><h4 class="card__title" style="font-size:1.05rem">Fee payment &amp; admission</h4><p class="card__body">Pay your fee and receive your official admission offer letter.</p></div>
+    </div>
+
+    <div class="grid grid--2 u-mt-8" style="gap:2.5rem">
+      <div>
+        <h3>Eligibility</h3>
+        <ul>
+          <li>A bachelor's degree or equivalent from a recognised university, in any discipline.</li>
+          <li>A strong academic record.</li>
+          <li>English proficiency — IELTS/TOEFL or equivalent for non-native speakers.</li>
+          <li>Relevant work experience is preferred but not mandatory.</li>
+        </ul>
+        <h3 class="u-mt-7">Support included with your application</h3>
+        <ul>
+          <li>Resume &amp; profile building</li>
+          <li>Career coaching &amp; advising</li>
+          <li>Interview preparation</li>
+          <li>Soft skills mastery</li>
+        </ul>
+      </div>
+      <div class="lead-panel" style="align-self:start">
+        <div class="lead-panel__head"><h3>Not sure you're eligible?</h3><p>Request the brochure and an advisor will confirm.</p></div>
+        <div class="lead-panel__body">
+          <a class="btn btn--blue btn--block" href="#lead-form">Get the programme brochure</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FAQ ============================ -->
+<section class="section" id="faq">
+  <div class="container">
+    <div class="sec-head"><p class="eyebrow">Frequently asked questions</p><h2>Before you apply</h2></div>
+    <div class="acc">
+      <details open><summary>Do I need a coding background to apply?</summary><div class="acc__panel"><p>No. A bachelor's degree in any discipline is accepted for admission. Python programming and applied AI tools are taught within the curriculum — coding is part of what you'll learn, not a prerequisite to get in.</p></div></details>
+      <details><summary>Is GEM Alpine Business School accredited?</summary><div class="acc__panel"><p>GEM Alpine Business School holds the Triple Crown of accreditation — AMBA, AACSB and EQUIS — held by fewer than 1% of business schools worldwide, and its programmes are delivered under university accreditation standards. Accreditation applies to the school.</p></div></details>
+      <details><summary>How long is the programme and how is it delivered?</summary><div class="acc__panel"><p>12 months, 90 ECTS credits (EQF Level 7), delivered fully online with live weekly sessions plus independent LMS-based study, simulations and case labs.</p></div></details>
+      <details><summary>Is work experience required?</summary><div class="acc__panel"><p>It's preferred but not mandatory. If you hold a relevant bachelor's degree and are ready for the workload, you're welcome to apply.</p></div></details>
+      <details><summary>How much time should I expect to commit each week?</summary><div class="acc__panel"><p>Plan for roughly 4–6 hours a day alongside live Friday/Saturday sessions — this is a rigorous postgraduate-level programme built for working professionals, not a light commitment.</p></div></details>
+      <details><summary>Is there a fee to apply?</summary><div class="acc__panel"><p>No. There is no fee to submit your application or request the brochure.</p></div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FINAL CTA ============================ -->
+<section class="section section--teal">
+  <div class="container u-center" style="max-width:64ch">
+    <p class="eyebrow" style="justify-content:center">Ready when you are</p>
+    <h2 style="color:#fff">Transform data. Lead with AI.</h2>
+    <p style="color:#C9D6DA">Get the full brochure — curriculum, fees and the next intake date.</p>
+    <div class="btn-row" style="justify-content:center">
+      <a class="btn btn--yellow" href="#lead-form">Get programme details</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <a class="gem-wordmark" href="#top" aria-label="GEM Alpine Business School">
+      <span class="gem-g">GEM</span>
+      <span class="gem-sub">Alpine<br>Business<br>School</span>
+    </a>
+    <p style="margin-top:1.25rem;max-width:52ch">GEM Alpine Business School (formerly Grenoble École de Management) — founded in 1984, Grenoble, France. Member of the Conférence des Grandes Ecoles (CGE) and CDEFM.</p>
+
+    <div class="footer-legal">
+      <span>&copy; 2026 GEM Alpine Business School.</span>
+      <span style="display:flex;gap:1.5rem;flex-wrap:wrap">
+        <a href="/privacy-policy/">Privacy</a><a href="/terms-and-conditions/">Terms</a>
+      </span>
+    </div>
+
+    <div class="partner-disclosure">
+      <b>Recruitment partner disclosure.</b> This programme is recruited on behalf of GEM Alpine Business School by BIGNxt Education, its official recruitment partner.
+    </div>
+  </div>
+</footer>
+
+<div class="sticky-cta">
+  <a class="btn btn--blue btn--block" href="#lead-form">Request the brochure</a>
+</div>
+
+<script>
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  document.querySelectorAll('form.lead-form').forEach(function (form) {
+    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'gclid', 'fbclid'].forEach(function (key) {
+      var el = form.querySelector('[name="' + key + '"]');
+      if (el) el.value = params.get(key) || '';
+    });
+    var pageUrlEl = form.querySelector('[name="page_url"]');
+    if (pageUrlEl) pageUrlEl.value = window.location.href;
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      // TODO before go-live: point this at a real endpoint (CRM/HubSpot,
+      // Google Sheet via Apps Script, or the WordPress ACF lead handler) —
+      // this demo only shows the confirmation state.
+      var data = Object.fromEntries(new FormData(form).entries());
+      console.log('GEM AI & Applied Data Science — lead captured', data);
+      form.hidden = true;
+      var thanks = form.parentElement.querySelector('.lead-thanks');
+      if (thanks) thanks.hidden = false;
+    });
+  });
+})();
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Course",
+  "name": "Master of Artificial Intelligence & Applied Data Science",
+  "description": "A 12-month, 90-ECTS online Master's in Artificial Intelligence & Applied Data Science.",
+  "provider": {
+    "@type": "CollegeOrUniversity",
+    "name": "GEM Alpine Business School (formerly Grenoble École de Management)",
+    "sameAs": "https://www.grenoble-em.com/"
+  },
+  "hasCourseInstance": {
+    "@type": "CourseInstance",
+    "courseMode": "online",
+    "courseWorkload": "PT4H/day"
+  }
+}
+</script>
+
+</body>
+</html>
