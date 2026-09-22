@@ -1088,7 +1088,7 @@
       <li><strong>Degree bucket.</strong> Derived from &ldquo;Level of study&rdquo; (CRM) or the campaign name (Ads): Bachelors/BBA/BSc &rarr; <em>Bachelor</em>; Masters/Executive Masters/MBA/DBA/Doctorate &rarr; <em>Masters</em>; certificates/diplomas/unlabeled &rarr; <em>Other</em>.</li>
       <li><strong>Funnel stages.</strong> The CRM &ldquo;Status&rdquo; field is a current snapshot, not a stage-entry log, so this funnel shows <em>where leads sit today</em>, not cohort conversion over time. Stages roll up as: New&nbsp;Lead &rarr; Working (Recontactable/Non&nbsp;Contactable/Call&nbsp;Back/Future&nbsp;follow&nbsp;up) &rarr; Qualified (Prospect/Hot&nbsp;Prospect) &rarr; Meeting&nbsp;Scheduled &rarr; Meeting&nbsp;Done &rarr; Application&nbsp;Filled &rarr; Admission&nbsp;Done. Not&nbsp;Interested/Not&nbsp;Eligible/Cold are tracked separately as Lost.</li>
       <li><strong>Campaign join.</strong> Ad spend is matched to CRM leads by exact campaign name, which recovers 94.5% of tracked ad spend across all three platforms (163 of 206 ad campaigns). Unmatched campaigns are usually traffic/awareness objectives that aren&rsquo;t expected to log CRM leads directly &mdash; <strong>except on Google Ads</strong>, where the match rate is unusually low (about 1% of Google spend matched): the CRM&rsquo;s recorded campaign value for Google traffic (e.g. &ldquo;RRU / Africa Search / 18/4/2026 / G&rdquo;) doesn&rsquo;t exactly match the real Google Ads campaign name (&ldquo;RRU / Africa / Search / 18/4/2026 / G&rdquo;) &mdash; likely a UTM-tagging mismatch on the Google side, unlike Meta/LinkedIn where the tagging lines up. Worth fixing at the source so Google spend joins correctly here.</li>
-      <li><strong>Adset drill-down (Campaign table&rsquo;s &ldquo;+&rdquo; column, added 2026-09-22).</strong> Expands a campaign row into its individual Meta adsets &mdash; leads/admissions/geo come from the CRM&rsquo;s own AdsetName field (full history); ad spend/CPL per adset is only available for adsets active from 22 Sep 2026 onward, since that dimension wasn&rsquo;t part of the daily Supermetrics pull before then &mdash; older dates will show adset-level leads with no matching spend. Only campaigns with more than one distinct adset show an active &ldquo;+&rdquo;; a single-adset campaign has nothing further to reveal. LinkedIn and Google have no adset-equivalent concept, so this only ever applies to Meta/Facebook campaigns.</li>
+      <li><strong>Adset drill-down (Campaign table&rsquo;s &ldquo;+&rdquo; column, added 2026-09-22).</strong> Expands a campaign row into its individual Meta adsets, with the same full lead&rarr;payment funnel shown at campaign level &mdash; the adset name itself already names the country/audience for every campaign that uses this feature, so no separate Geography column is shown. Ad spend/CPL/CAC is backfilled to <strong>18 Aug 2026</strong>, matching the date the CRM&rsquo;s own AdsetName field started being populated consistently (it existed sporadically before that on a handful of leads, not reliably enough to trust) &mdash; pulling spend further back than the CRM can actually match it against wouldn&rsquo;t give a real funnel, just spend with no context. <strong>Admissions here are CRM &ldquo;Admission Done&rdquo; status, not Payment-sheet sourced</strong> like every other admissions figure on this report &mdash; the Payment sheet has no AdsetName column to join on, so there&rsquo;s no finance-verified source at this granularity; treat this one table as the exception. Only campaigns with more than one distinct adset show an active &ldquo;+&rdquo;; a single-adset campaign has nothing further to reveal. LinkedIn and Google have no adset-equivalent concept, so this only ever applies to Meta/Facebook campaigns.</li>
       <li><strong>Stage-to-stage conversion.</strong> Most of these rates measure &ldquo;reached a stage or any later one&rdquo; (a lead that reached Meeting Done and was later marked Lost still counts as having reached it) &mdash; a floor, not exact cohort tracking, since Status is a snapshot with no history log. <strong>Lead &rarr; Prospect and Lead &rarr; Hot Prospect are the one exception: they count leads sitting in that exact status right now</strong>, not cumulatively through later stages &mdash; deliberately, since Prospect/Hot Prospect are subjective intent tags a BDE applies to a still-working lead, not a required workflow gate, so a lead very often moves straight to Meeting Scheduled or Application Filled without ever being tagged Hot Prospect along the way; counting those as &ldquo;reached Hot Prospect&rdquo; measurably overstated it (verified against a BDE&rsquo;s own CRM status filter: this dashboard read 2.3%, the CRM&rsquo;s own count was 0.1%). These two rows show percentage only, not a fraction, for the same reason &mdash; the underlying count is a shifting snapshot (leads sitting there today can move to any other stage tomorrow), not a stable cohort size worth quoting as a raw number. &ldquo;&hellip;&rarr; Payment&rdquo; figures (Meeting Done/Application &rarr; Payment, the standalone Lead &rarr; Payment rate, and the funnel chart&rsquo;s own Admission bar) are Payment-sheet sourced, not the CRM&rsquo;s Admission Done status &mdash; see the Admissions/ROI/Revenue note below.</li>
       <li><strong>Summary tab is always entity-split.</strong> Global and Saudi run separate budgets/targets, so Summary shows Global and Saudi side by side rather than toggling between them; the top Entity control only scopes Trends and the campaign table. Degree/University/Program/Channel/Country/Region filters narrow Summary the same way they narrow every other tab.</li>
       <li data-tab="hide-ceo"><strong>BDE &amp; Recommendations tabs are also always entity-split,</strong> for the same reason as Summary. Degree/University/Program/Channel/Country/Region and the date range narrow both exactly like Summary.</li>
@@ -2046,28 +2046,48 @@ let expandedCampaigns = new Set();
 // deliberately does NOT respect Entity/Degree/Channel/Geo/University/Program, since a single
 // campaign is already scoped to one of each - narrowing further would just make some adsets
 // disappear without any indication why, which is more confusing than useful here.
+//
+// Runs the exact same funnelConversions()/cumulativeFunnel() logic the campaign-level table uses -
+// each adset_agg.js CRM row already carries a `st` status histogram in the same shape as
+// crm_agg_new.json's `statuses` field (just a shorter key), so no separate funnel-math
+// implementation is needed here. Unlike every other admissions figure on this dashboard,
+// "won"/Admission here is CRM-status-derived, NOT Payment-sheet sourced - payments.tsv has no
+// AdsetName column to join on, so there's no Payment-sheet source of truth at this granularity.
+// This is a deliberate, documented exception (see the footer note), not an inconsistency.
 function adsetBreakdown(campaign){
   const agg = (typeof window!=='undefined' && window.ADSET_AGG) ? window.ADSET_AGG : {crm:[], ads:[]};
   const inRange = d => (!state.dateFrom || d>=state.dateFrom) && (!state.dateTo || d<=state.dateTo);
-  const map = new Map();
+  const crmByAdset = new Map();
   for(const r of agg.crm){
     if(r.c!==campaign || !inRange(r.d)) continue;
-    let o = map.get(r.a);
-    if(!o){ o = {adset:r.a, geo:r.g, leads:0, won:0, cost:0}; map.set(r.a,o); }
-    o.leads += r.l; o.won += r.w;
+    if(!crmByAdset.has(r.a)) crmByAdset.set(r.a, []);
+    crmByAdset.get(r.a).push({leads:r.l, statuses:r.st});
   }
+  const costByAdset = new Map();
   for(const r of agg.ads){
     if(r.c!==campaign || !inRange(r.d)) continue;
-    let o = map.get(r.a);
-    if(!o){ o = {adset:r.a, geo:null, leads:0, won:0, cost:0}; map.set(r.a,o); }
-    o.cost += r.cost;
+    costByAdset.set(r.a, (costByAdset.get(r.a)||0) + r.cost);
   }
-  return Array.from(map.values()).map(o=>({
-    ...o,
-    convRate: o.leads>0 ? o.won/o.leads*100 : null,
-    cpl: (o.cost>0 && o.leads>0) ? o.cost/o.leads : null,
-    cac: (o.cost>0 && o.won>0) ? o.cost/o.won : null
-  })).sort((a,b)=>b.leads-a.leads);
+  const adsets = new Set([...crmByAdset.keys(), ...costByAdset.keys()]);
+  const out = [];
+  for(const adset of adsets){
+    const rows = crmByAdset.get(adset) || [];
+    const leads = rows.reduce((s,r)=>s+r.leads,0);
+    const cost = costByAdset.get(adset) || 0;
+    const conv = funnelConversions(rows);
+    const won = conv[conv.length-1].num; // "Lead -> Payment" row's numerator = raw Admission count
+    out.push({
+      adset, leads, won, cost,
+      convRate: leads>0 ? won/leads*100 : null,
+      cpl: (cost>0 && leads>0) ? cost/leads : null,
+      cac: (cost>0 && won>0) ? cost/won : null,
+      leadToCallBack: conv[0].pct, leadToRecontactable: conv[1].pct, leadToProspect: conv[2].pct,
+      leadToHotProspect: conv[3].pct, leadToMeetingScheduled: conv[4].pct, leadToMeetingDone: conv[5].pct,
+      leadToApplication: conv[6].pct, meetingDoneToApplication: conv[7].pct,
+      meetingDoneToPayment: conv[8].pct, applicationToPayment: conv[9].pct
+    });
+  }
+  return out.sort((a,b)=>b.leads-a.leads);
 }
 
 // Computed once (not per-render): which campaigns have more than one distinct adset at all, across
@@ -2093,20 +2113,38 @@ function adsetSubRowHtml(campaign){
   if(rows.length===0){
     return `<tr class="adset-row"><td></td><td colspan="26"><div class="adset-empty">No adset data for the current date range.</div></td></tr>`;
   }
+  const pctOrDash = v => v!=null ? fmtPct(v) : '<span class="dash">'+EMDASH+'</span>';
   const body = rows.map(a=>`
     <tr>
       <td>${a.adset}</td>
-      <td>${a.geo||'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${fmtInt(a.leads)}</td>
       <td class="num">${fmtInt(a.won)}</td>
       <td class="num">${a.convRate!=null?fmtPct(a.convRate):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${a.cost>0?fmtMoney(a.cost):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${a.cpl!=null?fmtMoney(a.cpl):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${a.cac!=null?fmtMoney(a.cac):'<span class="dash">'+EMDASH+'</span>'}</td>
+      <td class="num">${pctOrDash(a.leadToCallBack)}</td>
+      <td class="num">${pctOrDash(a.leadToRecontactable)}</td>
+      <td class="num">${pctOrDash(a.leadToProspect)}</td>
+      <td class="num">${pctOrDash(a.leadToHotProspect)}</td>
+      <td class="num">${pctOrDash(a.leadToMeetingScheduled)}</td>
+      <td class="num">${pctOrDash(a.leadToMeetingDone)}</td>
+      <td class="num">${pctOrDash(a.leadToApplication)}</td>
+      <td class="num">${pctOrDash(a.meetingDoneToApplication)}</td>
+      <td class="num">${pctOrDash(a.meetingDoneToPayment)}</td>
+      <td class="num">${pctOrDash(a.applicationToPayment)}</td>
     </tr>`).join('');
   return `<tr class="adset-row"><td></td><td colspan="26">
     <table class="adset-subtable">
-      <thead><tr><th>Adset</th><th>Geography</th><th class="num">Leads</th><th class="num">Admissions</th><th class="num">Conv.&nbsp;%</th><th class="num">Spend (AED)</th><th class="num">CPL</th><th class="num">CAC</th></tr></thead>
+      <thead><tr>
+        <th>Adset</th><th class="num">Leads</th><th class="num">Admissions</th><th class="num">Conv.&nbsp;%</th>
+        <th class="num">Spend (AED)</th><th class="num">CPL</th><th class="num">CAC</th>
+        <th class="num">Lead&rarr;Call&nbsp;Back</th><th class="num">Lead&rarr;Recontactable</th>
+        <th class="num">Lead&rarr;Prospect</th><th class="num">Lead&rarr;Hot&nbsp;Prospect</th>
+        <th class="num">Lead&rarr;Mtg&nbsp;Scheduled</th><th class="num">Lead&rarr;Mtg&nbsp;Done</th>
+        <th class="num">Lead&rarr;Application</th><th class="num">Mtg&nbsp;Done&rarr;Application</th>
+        <th class="num">Mtg&nbsp;Done&rarr;Payment</th><th class="num">Application&rarr;Payment</th>
+      </tr></thead>
       <tbody>${body}</tbody>
     </table>
   </td></tr>`;
