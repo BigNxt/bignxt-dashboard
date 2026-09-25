@@ -239,6 +239,7 @@
   .chip.reco-Optimize{ background:color-mix(in srgb, var(--warning) 26%, transparent); color:#8a6200; }
   .chip.reco-Pause{ background:color-mix(in srgb, var(--critical) 16%, transparent); color:var(--critical); }
   .chip.reco-Insufficient{ background:var(--surface-2); color:var(--muted); }
+  .chip.reco-AlreadyPaused{ background:var(--surface-2); color:var(--muted); }
   :root[data-theme="dark"] .chip.reco-Optimize, :root:not([data-theme="light"]) .chip.reco-Optimize{ color:#ffce5c; }
 
   .alert-card{ border-left:3px solid var(--critical); }
@@ -668,12 +669,13 @@
   </div>
 
   <div id="recoView" style="display:none;">
-    <div class="scope-note">Scale/Optimize/Pause calls are based on two <strong>primary</strong> signals compared against the team&rsquo;s own median (a Global row is never compared to a Saudi median or vice versa) &mdash; <strong>CPL</strong> and <strong>lead quality</strong> (a blended average of Lead&rarr;Prospect, Lead&rarr;Hot Prospect, Lead&rarr;Meeting Scheduled, Lead&rarr;Meeting Done and Lead&rarr;Application rates). Both are available almost immediately after spend/leads happen, unlike CAC/ROI/conversion which need a payment to land &mdash; and our payment cycle is long enough that waiting for those would mean acting too late. If prospects are qualifying, getting meetings booked and held, and filing applications, payment tends to follow eventually even before it shows up. Both primary signals need to agree to call Scale or Pause; disagreement lands as Optimize. <strong>CAC and ROI are still considered</strong>, just not voted on equally &mdash; a Scale call is pulled back to Optimize if the realized economics already look bad, and a Pause call is pulled back to Optimize if they already look good, but neither can flip a call straight from Scale to Pause or back on lagging data alone. Needs at least 20 leads (or meaningful spend) to get a call; smaller campaigns are marked Insufficient data. Degree/University/Program/Channel/Country/Region filters above narrow these tables. The Entity toggle now filters this tab directly &mdash; All pools both teams into one table (each row tagged with its own Entity), Global/Saudi shows just that team. Geography is skipped for Saudi (effectively single-geography, so a breakdown there would be one meaningless row).</div>
+    <div class="scope-note">Scale/Optimize/Pause calls are based on two <strong>primary</strong> signals compared against the team&rsquo;s own median (a Global row is never compared to a Saudi median or vice versa) &mdash; <strong>CPL</strong> and <strong>lead quality</strong>. Lead quality checks Lead&rarr;Prospect, Lead&rarr;Hot Prospect, Lead&rarr;Meeting Scheduled, Lead&rarr;Meeting Done and Lead&rarr;Application <em>separately</em>, each against its own peer median, and takes a majority vote (shown as &ldquo;X of 5&rdquo;) &mdash; these 5 rates are never averaged together, since Prospect/Hot Prospect are current-status snapshots (how many leads sit in that exact status right now) while the other three are cumulative "ever reached" rates, and blending those magnitudes together previously produced a distorted number. All 5 are available almost immediately after spend/leads happen, unlike CAC/ROI/conversion which need a payment to land &mdash; and our payment cycle is long enough that waiting for those would mean acting too late. If prospects are qualifying, getting meetings booked and held, and filing applications, payment tends to follow eventually even before it shows up. Both primary signals need to agree to call Scale or Pause; disagreement lands as Optimize. <strong>CAC and ROI are still considered</strong>, just not voted on equally &mdash; a Scale call is pulled back to Optimize if the realized economics already look bad, and a Pause call is pulled back to Optimize if they already look good, but neither can flip a call straight from Scale to Pause or back on lagging data alone. Needs at least 20 leads (or meaningful spend) to get a call; smaller campaigns are marked Insufficient data. A campaign whose own Status is already Paused (Meta/LinkedIn/Google&rsquo;s real run-status, same chip as the Trends tab) shows &ldquo;Already paused&rdquo; instead of a fresh Pause call &mdash; the diagnostic still ran and still agrees pausing was/is justified, it just isn&rsquo;t a new action to take. Degree/University/Program/Channel/Country/Region filters above narrow these tables. The Entity toggle now filters this tab directly &mdash; All pools both teams into one table (each row tagged with its own Entity), Global/Saudi shows just that team. Geography is skipped for Saudi (effectively single-geography, so a breakdown there would be one meaningless row).</div>
     <div class="card">
       <div class="card-head"><h2>Campaigns</h2><button type="button" class="csv-btn" id="recoCampaignTableCsv">Download CSV</button></div>
       <div class="tablewrap"><table id="recoCampaignTable">
         <thead><tr>
           <th data-key="name">Campaign<span class="arrow">&#9662;</span></th>
+          <th data-key="status">Status<span class="arrow">&#9662;</span></th>
           <th data-key="entity">Entity<span class="arrow">&#9662;</span></th>
           <th class="num" data-key="leads">Leads<span class="arrow">&#9662;</span></th>
           <th class="num" data-key="won">Admissions<span class="arrow">&#9662;</span></th>
@@ -682,7 +684,7 @@
           <th class="num" data-key="cpl">CPL<span class="arrow">&#9662;</span></th>
           <th class="num" data-key="cac">CAC<span class="arrow">&#9662;</span></th>
           <th class="num" data-key="roi">ROI<span class="arrow">&#9662;</span></th>
-          <th class="num" data-key="qualityScore">Lead&nbsp;Quality<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="qualityGoodCount">Lead&nbsp;Quality<span class="arrow">&#9662;</span></th>
           <th data-key="recoRank">Call<span class="arrow">&#9662;</span></th>
         </tr></thead>
         <tbody id="recoCampaignBody"></tbody>
@@ -691,7 +693,7 @@
     <div class="card" id="recoGeoCard" style="margin-top:14px;">
       <div class="card-head"><h2>Geography</h2><button type="button" class="csv-btn" id="recoGeoTableCsv">Download CSV</button></div>
       <div class="tablewrap"><table id="recoGeoTable">
-        <thead><tr><th data-key="name">Geography<span class="arrow">&#9662;</span></th><th class="num" data-key="leads">Leads<span class="arrow">&#9662;</span></th><th class="num" data-key="convRate">Conv.&nbsp;%<span class="arrow">&#9662;</span></th><th class="num" data-key="cpl">CPL<span class="arrow">&#9662;</span></th><th class="num" data-key="cac">CAC<span class="arrow">&#9662;</span></th><th class="num" data-key="qualityScore">Lead&nbsp;Quality<span class="arrow">&#9662;</span></th><th data-key="recoRank">Call<span class="arrow">&#9662;</span></th></tr></thead>
+        <thead><tr><th data-key="name">Geography<span class="arrow">&#9662;</span></th><th class="num" data-key="leads">Leads<span class="arrow">&#9662;</span></th><th class="num" data-key="convRate">Conv.&nbsp;%<span class="arrow">&#9662;</span></th><th class="num" data-key="cpl">CPL<span class="arrow">&#9662;</span></th><th class="num" data-key="cac">CAC<span class="arrow">&#9662;</span></th><th class="num" data-key="qualityGoodCount">Lead&nbsp;Quality<span class="arrow">&#9662;</span></th><th data-key="recoRank">Call<span class="arrow">&#9662;</span></th></tr></thead>
         <tbody id="recoGeoBody"></tbody>
       </table></div>
     </div>
@@ -2711,17 +2713,25 @@ function renderBde(){
 }
 
 /* ---------------- recommendations (scale / optimize / pause) ---------------- */
-const RECO_RANK = {Pause:0, Optimize:1, Scale:2, Insufficient:3};
+const RECO_RANK = {Pause:0, Optimize:1, Scale:2, Insufficient:3, 'Already paused':4};
 const MIN_RECO_LEADS = 20, MIN_RECO_SPEND = 300;
 
-// Lead-quality signal for Recommendations (redesigned 2026-09-25, per explicit instruction): a
-// blended average across the 5 funnel stages that happen within days of a lead arriving - Prospect,
-// Hot Prospect, Meeting Scheduled, Meeting Done, Application (funnelConversions indices 2-6) -
-// rather than Meeting Done alone. The point is to read whether a campaign's leads are actually
-// progressing without waiting on the long payment cycle: if prospects are qualifying, getting
-// meetings booked and held, and filing applications, payment tends to follow eventually even though
-// it hasn't landed yet. Grouped by the same keyFn as the rest of that dimension's breakdown so a
-// campaign/geo's quality score lines up with its own CRM rows exactly.
+const QUALITY_KEYS = ['prospect','hotProspect','meetingScheduled','meetingDone','application'];
+
+// Lead-quality signal for Recommendations, per-stage version (fixed 2026-09-25 - the first version
+// blended all 5 stages' raw percentages into one average, which was NOT an apples-to-apples number:
+// funnelConversions marks Prospect/Hot Prospect (indices 2-3) as `snapshot:true` - a current-status
+// count ("how many leads are sitting in this exact status right now"), structurally much smaller
+// than Meeting Scheduled/Meeting Done/Application (indices 4-6), which are CUMULATIVE "reached this
+// stage or later" counts (see the snapshot-vs-cumulative comment inside funnelConversions - a real
+// BDE's CRM filter confirmed cumulative-read Hot Prospect at 2.3% vs current-status-read at 0.1%,
+// ~23x apart). Averaging a permanently-tiny snapshot rate together with 3 genuinely cumulative rates
+// dragged the composite down in a way that didn't reflect real quality, and was reported as
+// inaccurate. Fix: never blend the 5 rates' raw magnitudes together - keep each stage separate and
+// compare it only to ITS OWN peer median (same stage, same measurement type), then majority-vote
+// across those 5 independent comparisons (see computeQualityVote below). This still honours "if it
+// has good prospect, hot prospect, meeting scheduled, meeting done and application" without ever
+// comparing incompatible numbers to each other.
 function segmentFunnelQuality(crmRows, keyFn){
   const map = new Map();
   for(const r of crmRows){
@@ -2732,10 +2742,24 @@ function segmentFunnelQuality(crmRows, keyFn){
   const out = new Map();
   for(const [k, rows] of map){
     const conv = funnelConversions(rows);
-    const vals = [conv[2].pct, conv[3].pct, conv[4].pct, conv[5].pct, conv[6].pct].filter(v=>v!=null);
-    out.set(k, vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null);
+    out.set(k, {prospect:conv[2].pct, hotProspect:conv[3].pct, meetingScheduled:conv[4].pct, meetingDone:conv[5].pct, application:conv[6].pct});
   }
   return out;
+}
+
+// Majority vote across the 5 funnel-quality stages, each compared only to its own median (never to
+// each other) - returns how many of the comparable stages this row beats, alongside the overall
+// good/bad/neutral call used by classifyReco. goodCount/total are also kept on the row for display
+// (an "X of 5 stages above median" read, not a blended percentage).
+function computeQualityVote(rowQuality, medQuality){
+  const checks = QUALITY_KEYS
+    .map(k => (medQuality[k]!=null && rowQuality[k]!=null) ? rowQuality[k] >= medQuality[k] : null)
+    .filter(v=>v!==null);
+  if(checks.length===0) return {qualityGood:null, goodCount:0, total:0};
+  const goodCount = checks.filter(v=>v).length;
+  const badCount = checks.length-goodCount;
+  const qualityGood = goodCount>badCount ? true : badCount>goodCount ? false : null;
+  return {qualityGood, goodCount, total:checks.length};
 }
 
 // Scale/Optimize/Pause basis (redesigned 2026-09-25, per explicit instruction): CPL and lead quality
@@ -2744,12 +2768,11 @@ function segmentFunnelQuality(crmRows, keyFn){
 // waiting for those would mean acting too late. Both signals need to agree to call Scale or Pause;
 // disagreement (or only one being comparable) lands as Optimize, same "needs real agreement" spirit
 // as the previous 3-signal vote.
-function classifyReco(row, med){
+function classifyReco(row, med, qv){
   const hasVolume = row.leads>=MIN_RECO_LEADS || row.cost>=MIN_RECO_SPEND;
   if(!hasVolume) return 'Insufficient';
   const cplGood = (med.cpl!=null && row.cpl!=null) ? row.cpl <= med.cpl : null;
-  const qualityGood = (med.quality!=null && row.qualityScore!=null) ? row.qualityScore >= med.quality : null;
-  const primary = [cplGood, qualityGood].filter(s=>s!==null);
+  const primary = [cplGood, qv.qualityGood].filter(s=>s!==null);
   if(primary.length===0) return 'Insufficient';
   let call = primary.every(s=>s===true) ? 'Scale' : primary.every(s=>s===false) ? 'Pause' : 'Optimize';
 
@@ -2767,20 +2790,31 @@ function classifyReco(row, med){
     if(call==='Scale' && modifiers.every(s=>s===false)) call='Optimize';
     if(call==='Pause' && modifiers.every(s=>s===true)) call='Optimize';
   }
+  // A campaign already Paused (Meta/LinkedIn/Google's own run-status, joined via CAMPAIGN_STATUS_MAP
+  // - see computeRecoForEntity) doesn't need a fresh "Pause" call telling the user to do what's
+  // already done - that reads as noise or a bug, not a recommendation (2026-09-25, per user report:
+  // "some paused campaign are also showing with a call to pause"). Relabelled rather than suppressed
+  // entirely, so the underlying diagnostic still surfaces ("yes, pausing this was/is justified") -
+  // Geography rows have no single campaign's status to check (row.status is only set on campaign
+  // rows), so this never fires there.
+  if(call==='Pause' && row.status==='Paused') return 'Already paused';
   return call;
 }
 
 function classifyDimension(rows){
   const eligible = rows.filter(r=>r.leads>=MIN_RECO_LEADS || r.cost>=MIN_RECO_SPEND);
+  const medQuality = {};
+  QUALITY_KEYS.forEach(k=>{ medQuality[k] = median(eligible.filter(r=>r.quality[k]!=null).map(r=>r.quality[k])); });
   const med = {
     cpl: median(eligible.filter(r=>r.cpl!=null).map(r=>r.cpl)),
     cac: median(eligible.filter(r=>r.cac!=null).map(r=>r.cac)),
     roi: median(eligible.filter(r=>r.roi!=null).map(r=>r.roi)),
-    quality: median(eligible.filter(r=>r.qualityScore!=null).map(r=>r.qualityScore))
+    quality: medQuality
   };
   return rows.map(r=>{
-    const reco = classifyReco(r, med);
-    return Object.assign({}, r, {reco, recoRank: RECO_RANK[reco], med});
+    const qv = computeQualityVote(r.quality, med.quality);
+    const reco = classifyReco(r, med, qv);
+    return Object.assign({}, r, {reco, recoRank: RECO_RANK[reco], med, qualityGoodCount:qv.goodCount, qualityTotal:qv.total});
   });
 }
 
@@ -2790,18 +2824,19 @@ function computeRecoForEntity(entityValue){
   // Admissions/conv./CAC/ROI are Payment-sheet sourced here too, same as everywhere else - shown for
   // context and folded in as the "considered" modifier above, just no longer the primary vote.
   const rangePayments = ALL_PAYMENTS.filter(r => r.entity===entityValue && paymentMatchesDate(r) && paymentDimMatch(r));
+  const emptyQuality = {prospect:null,hotProspect:null,meetingScheduled:null,meetingDone:null,application:null};
   const toRows = keyFn => {
     const qualityMap = segmentFunnelQuality(rangeCRM, keyFn);
     return segmentBreakdown(rangeCRM, rangeAds, keyFn, keyFn, rangePayments).map(s=>({
       name:s.label, leads:s.leads, won:s.won, convRate:s.convRate, cost:s.cost, cpl:s.cpl, cac:s.cac,
-      qualityScore: qualityMap.has(s.label) ? qualityMap.get(s.label) : null
+      quality: qualityMap.has(s.label) ? qualityMap.get(s.label) : emptyQuality
     }));
   };
   const feeMap = paymentFeeByCampaign(entityValue);
   const campaignRows = toRows(r=>r.campaign).map(r=>{
     const fee = feeMap.get(r.name);
     const feeAED = fee ? fee.feeAED : null;
-    return Object.assign({}, r, {feeAED, roi: (fee && r.cost>0) ? (fee.feeAED-r.cost)/r.cost*100 : null});
+    return Object.assign({}, r, {feeAED, roi: (fee && r.cost>0) ? (fee.feeAED-r.cost)/r.cost*100 : null, status: CAMPAIGN_STATUS_MAP.get(r.name) || null});
   });
   return {
     campaigns: classifyDimension(campaignRows),
@@ -2832,11 +2867,16 @@ const recoStates = {
   campaign:{key:'recoRank',dir:'asc'}, geo:{key:'recoRank',dir:'asc'}
 };
 
+// CSS class names can't contain a space, so "Already paused" needs its own sanitized token -
+// every other reco value is already a single word and passes through unchanged.
+function recoChipClass(reco){ return reco==='Already paused' ? 'AlreadyPaused' : reco; }
+
 function renderRecoCampaignTable(tbodyId, rows, sortState){
   const sorted = sortByState(rows, sortState);
   document.getElementById(tbodyId).innerHTML = sorted.map(r=>`
     <tr>
       <td>${r.name}</td>
+      <td>${r.status?`<span class="chip camp-${r.status}">${r.status}</span>`:'<span class="dash">'+EMDASH+'</span>'}</td>
       <td><span class="chip ent-${r.entity}">${r.entity}</span></td>
       <td class="num">${fmtInt(r.leads)}</td>
       <td class="num">${fmtInt(r.won)}</td>
@@ -2845,9 +2885,9 @@ function renderRecoCampaignTable(tbodyId, rows, sortState){
       <td class="num">${r.cpl!=null?fmtMoney(r.cpl):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${r.cac!=null?fmtMoney(r.cac):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${r.roi!=null?(r.roi>=0?'+':'')+r.roi.toFixed(0)+'%':'<span class="dash">'+EMDASH+'</span>'}</td>
-      <td class="num">${r.qualityScore!=null?fmtPct(r.qualityScore):'<span class="dash">'+EMDASH+'</span>'}</td>
-      <td><span class="chip reco-${r.reco}">${r.reco}</span></td>
-    </tr>`).join('') || '<tr><td colspan="11" class="empty-state">No data in this range.</td></tr>';
+      <td class="num">${r.qualityTotal>0?r.qualityGoodCount+'/'+r.qualityTotal:'<span class="dash">'+EMDASH+'</span>'}</td>
+      <td><span class="chip reco-${recoChipClass(r.reco)}">${r.reco}</span></td>
+    </tr>`).join('') || '<tr><td colspan="12" class="empty-state">No data in this range.</td></tr>';
 }
 function renderRecoSimpleTable(tbodyId, rows, sortState){
   const sorted = sortByState(rows, sortState);
@@ -2858,8 +2898,8 @@ function renderRecoSimpleTable(tbodyId, rows, sortState){
       <td class="num">${r.convRate!=null?fmtPct(r.convRate):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${r.cpl!=null?fmtMoney(r.cpl):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${r.cac!=null?fmtMoney(r.cac):'<span class="dash">'+EMDASH+'</span>'}</td>
-      <td class="num">${r.qualityScore!=null?fmtPct(r.qualityScore):'<span class="dash">'+EMDASH+'</span>'}</td>
-      <td><span class="chip reco-${r.reco}">${r.reco}</span></td>
+      <td class="num">${r.qualityTotal>0?r.qualityGoodCount+'/'+r.qualityTotal:'<span class="dash">'+EMDASH+'</span>'}</td>
+      <td><span class="chip reco-${recoChipClass(r.reco)}">${r.reco}</span></td>
     </tr>`).join('') || '<tr><td colspan="7" class="empty-state">No data in this range.</td></tr>';
 }
 
