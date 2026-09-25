@@ -668,78 +668,32 @@
   </div>
 
   <div id="recoView" style="display:none;">
-    <div class="scope-note">Scale/Optimize/Pause calls are made <em>within</em> each team and dimension by a majority vote of three independent signals compared against that team&rsquo;s own median &mdash; a Global campaign is never compared to a Saudi one: <strong>conversion rate</strong> and <strong>CAC</strong> (Payment-sheet sourced, not CRM Admission Done), plus <strong>Lead&rarr;Meeting Done rate</strong> as a funnel-quality read, so a single skewed metric (e.g. one lucky payment inflating conversion, or a thin sample inflating CAC) can no longer force a call the other signals disagree with &mdash; it takes 2 of the 3 comparable signals agreeing to call Scale or Pause; anything else lands as Optimize. A metric with no comparable median for that row (e.g. CAC on a zero-spend channel) simply doesn&rsquo;t vote. Needs at least 20 leads (or meaningful spend) to get a call; smaller campaigns are marked Insufficient data. Degree/University/Program/Channel/Country/Region filters above narrow these tables; Entity does not (both teams always shown).</div>
-    <div id="recoGlobalBlock">
-      <div class="entity-head is-global-head"><span class="entity-dot" style="background:var(--s1)"></span><h2>Global team</h2></div>
-      <div class="card">
-        <div class="card-head"><h2>Campaigns</h2><button type="button" class="csv-btn" id="recoCampaignTableGlobalCsv">Download CSV</button></div>
-        <div class="tablewrap"><table id="recoCampaignTableGlobal">
-          <thead><tr>
-            <th data-key="name">Campaign<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="leads">Leads<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="won">Admissions<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="convRate">Conv.&nbsp;%<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="cost">Spend (AED)<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="cac">CAC<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="roi">ROI<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="qualityRate">Lead&rarr;Mtg&nbsp;Done<span class="arrow">&#9662;</span></th>
-            <th data-key="recoRank">Call<span class="arrow">&#9662;</span></th>
-          </tr></thead>
-          <tbody id="recoCampaignBodyGlobal"></tbody>
-        </table></div>
-      </div>
-      <div class="breakdown-grid">
-        <div class="card">
-          <div class="card-head"><h2>Geography</h2><button type="button" class="csv-btn" id="recoGeoTableGlobalCsv">Download CSV</button></div>
-          <div class="tablewrap"><table id="recoGeoTableGlobal">
-            <thead><tr><th data-key="name">Geography<span class="arrow">&#9662;</span></th><th class="num" data-key="leads">Leads<span class="arrow">&#9662;</span></th><th class="num" data-key="convRate">Conv.&nbsp;%<span class="arrow">&#9662;</span></th><th class="num" data-key="cac">CAC<span class="arrow">&#9662;</span></th><th class="num" data-key="qualityRate">Lead&rarr;Mtg&nbsp;Done<span class="arrow">&#9662;</span></th><th data-key="recoRank">Call<span class="arrow">&#9662;</span></th></tr></thead>
-            <tbody id="recoGeoBodyGlobal"></tbody>
-          </table></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><h2>Channel</h2><button type="button" class="csv-btn" id="recoChannelTableGlobalCsv">Download CSV</button></div>
-          <div class="tablewrap"><table id="recoChannelTableGlobal">
-            <thead><tr><th data-key="name">Channel<span class="arrow">&#9662;</span></th><th class="num" data-key="leads">Leads<span class="arrow">&#9662;</span></th><th class="num" data-key="convRate">Conv.&nbsp;%<span class="arrow">&#9662;</span></th><th class="num" data-key="cac">CAC<span class="arrow">&#9662;</span></th><th class="num" data-key="qualityRate">Lead&rarr;Mtg&nbsp;Done<span class="arrow">&#9662;</span></th><th data-key="recoRank">Call<span class="arrow">&#9662;</span></th></tr></thead>
-            <tbody id="recoChannelBodyGlobal"></tbody>
-          </table></div>
-        </div>
-      </div>
+    <div class="scope-note">Scale/Optimize/Pause calls are based on two <strong>primary</strong> signals compared against the team&rsquo;s own median (a Global row is never compared to a Saudi median or vice versa) &mdash; <strong>CPL</strong> and <strong>lead quality</strong> (a blended average of Lead&rarr;Prospect, Lead&rarr;Hot Prospect, Lead&rarr;Meeting Scheduled, Lead&rarr;Meeting Done and Lead&rarr;Application rates). Both are available almost immediately after spend/leads happen, unlike CAC/ROI/conversion which need a payment to land &mdash; and our payment cycle is long enough that waiting for those would mean acting too late. If prospects are qualifying, getting meetings booked and held, and filing applications, payment tends to follow eventually even before it shows up. Both primary signals need to agree to call Scale or Pause; disagreement lands as Optimize. <strong>CAC and ROI are still considered</strong>, just not voted on equally &mdash; a Scale call is pulled back to Optimize if the realized economics already look bad, and a Pause call is pulled back to Optimize if they already look good, but neither can flip a call straight from Scale to Pause or back on lagging data alone. Needs at least 20 leads (or meaningful spend) to get a call; smaller campaigns are marked Insufficient data. Degree/University/Program/Channel/Country/Region filters above narrow these tables. The Entity toggle now filters this tab directly &mdash; All pools both teams into one table (each row tagged with its own Entity), Global/Saudi shows just that team. Geography is skipped for Saudi (effectively single-geography, so a breakdown there would be one meaningless row).</div>
+    <div class="card">
+      <div class="card-head"><h2>Campaigns</h2><button type="button" class="csv-btn" id="recoCampaignTableCsv">Download CSV</button></div>
+      <div class="tablewrap"><table id="recoCampaignTable">
+        <thead><tr>
+          <th data-key="name">Campaign<span class="arrow">&#9662;</span></th>
+          <th data-key="entity">Entity<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="leads">Leads<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="won">Admissions<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="convRate">Conv.&nbsp;%<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="cost">Spend (AED)<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="cpl">CPL<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="cac">CAC<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="roi">ROI<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="qualityScore">Lead&nbsp;Quality<span class="arrow">&#9662;</span></th>
+          <th data-key="recoRank">Call<span class="arrow">&#9662;</span></th>
+        </tr></thead>
+        <tbody id="recoCampaignBody"></tbody>
+      </table></div>
     </div>
-    <div id="recoSaudiBlock">
-      <div class="entity-head is-saudi-head"><span class="entity-dot" style="background:var(--s3)"></span><h2>Saudi team</h2></div>
-      <div class="card">
-        <div class="card-head"><h2>Campaigns</h2><button type="button" class="csv-btn" id="recoCampaignTableSaudiCsv">Download CSV</button></div>
-        <div class="tablewrap"><table id="recoCampaignTableSaudi">
-          <thead><tr>
-            <th data-key="name">Campaign<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="leads">Leads<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="won">Admissions<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="convRate">Conv.&nbsp;%<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="cost">Spend (AED)<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="cac">CAC<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="roi">ROI<span class="arrow">&#9662;</span></th>
-            <th class="num" data-key="qualityRate">Lead&rarr;Mtg&nbsp;Done<span class="arrow">&#9662;</span></th>
-            <th data-key="recoRank">Call<span class="arrow">&#9662;</span></th>
-          </tr></thead>
-          <tbody id="recoCampaignBodySaudi"></tbody>
-        </table></div>
-      </div>
-      <div class="breakdown-grid">
-        <div class="card">
-          <div class="card-head"><h2>Geography</h2><button type="button" class="csv-btn" id="recoGeoTableSaudiCsv">Download CSV</button></div>
-          <div class="tablewrap"><table id="recoGeoTableSaudi">
-            <thead><tr><th data-key="name">Geography<span class="arrow">&#9662;</span></th><th class="num" data-key="leads">Leads<span class="arrow">&#9662;</span></th><th class="num" data-key="convRate">Conv.&nbsp;%<span class="arrow">&#9662;</span></th><th class="num" data-key="cac">CAC<span class="arrow">&#9662;</span></th><th class="num" data-key="qualityRate">Lead&rarr;Mtg&nbsp;Done<span class="arrow">&#9662;</span></th><th data-key="recoRank">Call<span class="arrow">&#9662;</span></th></tr></thead>
-            <tbody id="recoGeoBodySaudi"></tbody>
-          </table></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><h2>Channel</h2><button type="button" class="csv-btn" id="recoChannelTableSaudiCsv">Download CSV</button></div>
-          <div class="tablewrap"><table id="recoChannelTableSaudi">
-            <thead><tr><th data-key="name">Channel<span class="arrow">&#9662;</span></th><th class="num" data-key="leads">Leads<span class="arrow">&#9662;</span></th><th class="num" data-key="convRate">Conv.&nbsp;%<span class="arrow">&#9662;</span></th><th class="num" data-key="cac">CAC<span class="arrow">&#9662;</span></th><th class="num" data-key="qualityRate">Lead&rarr;Mtg&nbsp;Done<span class="arrow">&#9662;</span></th><th data-key="recoRank">Call<span class="arrow">&#9662;</span></th></tr></thead>
-            <tbody id="recoChannelBodySaudi"></tbody>
-          </table></div>
-        </div>
-      </div>
+    <div class="card" id="recoGeoCard" style="margin-top:14px;">
+      <div class="card-head"><h2>Geography</h2><button type="button" class="csv-btn" id="recoGeoTableCsv">Download CSV</button></div>
+      <div class="tablewrap"><table id="recoGeoTable">
+        <thead><tr><th data-key="name">Geography<span class="arrow">&#9662;</span></th><th class="num" data-key="leads">Leads<span class="arrow">&#9662;</span></th><th class="num" data-key="convRate">Conv.&nbsp;%<span class="arrow">&#9662;</span></th><th class="num" data-key="cpl">CPL<span class="arrow">&#9662;</span></th><th class="num" data-key="cac">CAC<span class="arrow">&#9662;</span></th><th class="num" data-key="qualityScore">Lead&nbsp;Quality<span class="arrow">&#9662;</span></th><th data-key="recoRank">Call<span class="arrow">&#9662;</span></th></tr></thead>
+        <tbody id="recoGeoBody"></tbody>
+      </table></div>
     </div>
   </div>
 
@@ -2760,14 +2714,14 @@ function renderBde(){
 const RECO_RANK = {Pause:0, Optimize:1, Scale:2, Insufficient:3};
 const MIN_RECO_LEADS = 20, MIN_RECO_SPEND = 300;
 
-// Funnel-quality signal for Recommendations/Focus Areas (2026-09-04): convRate/CAC alone can be
-// skewed by a single lucky (or unlucky) payment, especially over a shorter date range - a campaign
-// can look "Scale"-worthy on conversion while its leads barely engage, or look "Pause"-worthy on a
-// thin CAC sample while its leads are actually qualifying well. Lead -> Meeting Done is used as the
-// quality read (not Prospect/Hot Prospect, which are subjective BDE-applied tags per the snapshot-
-// vs-cumulative note in funnelConversions - Meeting Done is a real sequential gate: someone actually
-// had a conversation with this lead). Grouped by the same keyFn as the rest of that dimension's
-// breakdown so a campaign/geo/channel's quality rate lines up with its own CRM rows exactly.
+// Lead-quality signal for Recommendations (redesigned 2026-09-25, per explicit instruction): a
+// blended average across the 5 funnel stages that happen within days of a lead arriving - Prospect,
+// Hot Prospect, Meeting Scheduled, Meeting Done, Application (funnelConversions indices 2-6) -
+// rather than Meeting Done alone. The point is to read whether a campaign's leads are actually
+// progressing without waiting on the long payment cycle: if prospects are qualifying, getting
+// meetings booked and held, and filing applications, payment tends to follow eventually even though
+// it hasn't landed yet. Grouped by the same keyFn as the rest of that dimension's breakdown so a
+// campaign/geo's quality score lines up with its own CRM rows exactly.
 function segmentFunnelQuality(crmRows, keyFn){
   const map = new Map();
   for(const r of crmRows){
@@ -2776,51 +2730,71 @@ function segmentFunnelQuality(crmRows, keyFn){
     map.get(k).push(r);
   }
   const out = new Map();
-  for(const [k, rows] of map){ out.set(k, funnelConversions(rows)[5].pct); }
+  for(const [k, rows] of map){
+    const conv = funnelConversions(rows);
+    const vals = [conv[2].pct, conv[3].pct, conv[4].pct, conv[5].pct, conv[6].pct].filter(v=>v!=null);
+    out.set(k, vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null);
+  }
   return out;
 }
 
-// Three independent signals (conversion, CAC, funnel quality) vote instead of requiring the old
-// two-metric agreement - a majority (2 of however many are actually comparable) decides Scale/
-// Pause, so one skewed metric can no longer single-handedly force a call the other two disagree
-// with. Any metric with no comparable median (e.g. CAC on a zero-spend channel) simply doesn't vote.
-function classifyReco(row, medConv, medCac, medQuality){
+// Scale/Optimize/Pause basis (redesigned 2026-09-25, per explicit instruction): CPL and lead quality
+// are the PRIMARY signals - both are available almost immediately after spend/leads happen, unlike
+// CAC/ROI/conversion which need a payment to land, and the payment cycle here is long enough that
+// waiting for those would mean acting too late. Both signals need to agree to call Scale or Pause;
+// disagreement (or only one being comparable) lands as Optimize, same "needs real agreement" spirit
+// as the previous 3-signal vote.
+function classifyReco(row, med){
   const hasVolume = row.leads>=MIN_RECO_LEADS || row.cost>=MIN_RECO_SPEND;
   if(!hasVolume) return 'Insufficient';
-  const convGood = (medConv!=null && row.convRate!=null) ? row.convRate >= medConv : null;
-  const cacGood = (medCac!=null && row.cac!=null && row.cost>0) ? row.cac <= medCac : null;
-  const qualityGood = (medQuality!=null && row.qualityRate!=null) ? row.qualityRate >= medQuality : null;
-  const signals = [convGood, cacGood, qualityGood].filter(s=>s!==null);
-  if(signals.length===0) return 'Insufficient';
-  const goodCount = signals.filter(s=>s===true).length;
-  const badCount = signals.filter(s=>s===false).length;
-  if(badCount>=2) return 'Pause';
-  if(goodCount>=2 && badCount===0) return 'Scale';
-  return 'Optimize';
+  const cplGood = (med.cpl!=null && row.cpl!=null) ? row.cpl <= med.cpl : null;
+  const qualityGood = (med.quality!=null && row.qualityScore!=null) ? row.qualityScore >= med.quality : null;
+  const primary = [cplGood, qualityGood].filter(s=>s!==null);
+  if(primary.length===0) return 'Insufficient';
+  let call = primary.every(s=>s===true) ? 'Scale' : primary.every(s=>s===false) ? 'Pause' : 'Optimize';
+
+  // CAC and ROI are considered, not voted - realized economics (Payment-sheet sourced) lag behind
+  // the leading indicators above because of the long payment cycle, so they act as a sanity check
+  // instead of an equal-weight signal: a Scale call is pulled back to Optimize if BOTH available
+  // realized-economics signals already look bad, and a Pause call is pulled back to Optimize if BOTH
+  // already look good. Either way this only softens a call toward Optimize - it never flips Scale
+  // straight to Pause or vice versa on lagging data alone. ROI is campaign-only (Payment sheet has
+  // no Geography field to join against), so a Geography row's modifier runs on CAC alone.
+  const cacGood = (med.cac!=null && row.cac!=null && row.cost>0) ? row.cac <= med.cac : null;
+  const roiGood = (med.roi!=null && row.roi!=null) ? row.roi >= med.roi : null;
+  const modifiers = [cacGood, roiGood].filter(s=>s!==null);
+  if(modifiers.length>0){
+    if(call==='Scale' && modifiers.every(s=>s===false)) call='Optimize';
+    if(call==='Pause' && modifiers.every(s=>s===true)) call='Optimize';
+  }
+  return call;
 }
 
 function classifyDimension(rows){
   const eligible = rows.filter(r=>r.leads>=MIN_RECO_LEADS || r.cost>=MIN_RECO_SPEND);
-  const medConv = median(eligible.filter(r=>r.convRate!=null).map(r=>r.convRate));
-  const medCac = median(eligible.filter(r=>r.cac!=null).map(r=>r.cac));
-  const medQuality = median(eligible.filter(r=>r.qualityRate!=null).map(r=>r.qualityRate));
+  const med = {
+    cpl: median(eligible.filter(r=>r.cpl!=null).map(r=>r.cpl)),
+    cac: median(eligible.filter(r=>r.cac!=null).map(r=>r.cac)),
+    roi: median(eligible.filter(r=>r.roi!=null).map(r=>r.roi)),
+    quality: median(eligible.filter(r=>r.qualityScore!=null).map(r=>r.qualityScore))
+  };
   return rows.map(r=>{
-    const reco = classifyReco(r, medConv, medCac, medQuality);
-    return Object.assign({}, r, {reco, recoRank: RECO_RANK[reco], medConv, medCac, medQuality});
+    const reco = classifyReco(r, med);
+    return Object.assign({}, r, {reco, recoRank: RECO_RANK[reco], med});
   });
 }
 
 function computeRecoForEntity(entityValue){
   const rangeCRM = ALL_CRM.filter(r => r.entity===entityValue && matchesDate(r) && degreeChannelMatch(r));
   const rangeAds = ALL_ADS.filter(r => r.entity===entityValue && matchesDate(r) && degreeChannelMatch(r));
-  // Admissions/conv./CAC (and therefore the Scale/Optimize/Pause call, which compares conv./CAC
-  // against the team's own median) are Payment-sheet sourced here too, same as everywhere else.
+  // Admissions/conv./CAC/ROI are Payment-sheet sourced here too, same as everywhere else - shown for
+  // context and folded in as the "considered" modifier above, just no longer the primary vote.
   const rangePayments = ALL_PAYMENTS.filter(r => r.entity===entityValue && paymentMatchesDate(r) && paymentDimMatch(r));
   const toRows = keyFn => {
     const qualityMap = segmentFunnelQuality(rangeCRM, keyFn);
     return segmentBreakdown(rangeCRM, rangeAds, keyFn, keyFn, rangePayments).map(s=>({
-      name:s.label, leads:s.leads, won:s.won, convRate:s.convRate, cost:s.cost, cac:s.cac,
-      qualityRate: qualityMap.has(s.label) ? qualityMap.get(s.label) : null
+      name:s.label, leads:s.leads, won:s.won, convRate:s.convRate, cost:s.cost, cpl:s.cpl, cac:s.cac,
+      qualityScore: qualityMap.has(s.label) ? qualityMap.get(s.label) : null
     }));
   };
   const feeMap = paymentFeeByCampaign(entityValue);
@@ -2831,15 +2805,31 @@ function computeRecoForEntity(entityValue){
   });
   return {
     campaigns: classifyDimension(campaignRows),
-    geos: classifyDimension(toRows(r=>r.geo)),
-    channels: classifyDimension(toRows(r=>r.channel))
+    geos: classifyDimension(toRows(r=>r.geo))
   };
 }
 
+// Campaign and Geography are the only two dimensions kept (Channel dropped, 2026-09-25, per
+// explicit instruction). Both respond to the top Entity toggle now instead of always showing Global
+// and Saudi side by side (matching how Trends/the Campaign Performance table already behave) - "All"
+// pools both teams' rows into one table (tagged with an Entity chip per row so they stay
+// distinguishable), while Scale/Optimize/Pause is still always computed within each team's own
+// median, never comparing a Global row's call to a Saudi median or vice versa. Geography is skipped
+// for Saudi entirely (2026-09-25, per explicit instruction) - Saudi is effectively single-geography,
+// so a Saudi-only geography breakdown would be one meaningless row.
+function computeRecoCombined(){
+  const entities = state.entity==='All' ? ['Global','Saudi'] : [state.entity];
+  let campaigns = [], geos = [];
+  entities.forEach(ent=>{
+    const r = computeRecoForEntity(ent);
+    campaigns = campaigns.concat(r.campaigns.map(row=>Object.assign({}, row, {entity:ent})));
+    if(ent==='Global') geos = geos.concat(r.geos.map(row=>Object.assign({}, row, {entity:ent})));
+  });
+  return {campaigns, geos};
+}
+
 const recoStates = {
-  campaignGlobal:{key:'recoRank',dir:'asc'}, campaignSaudi:{key:'recoRank',dir:'asc'},
-  geoGlobal:{key:'recoRank',dir:'asc'}, geoSaudi:{key:'recoRank',dir:'asc'},
-  channelGlobal:{key:'recoRank',dir:'asc'}, channelSaudi:{key:'recoRank',dir:'asc'}
+  campaign:{key:'recoRank',dir:'asc'}, geo:{key:'recoRank',dir:'asc'}
 };
 
 function renderRecoCampaignTable(tbodyId, rows, sortState){
@@ -2847,15 +2837,17 @@ function renderRecoCampaignTable(tbodyId, rows, sortState){
   document.getElementById(tbodyId).innerHTML = sorted.map(r=>`
     <tr>
       <td>${r.name}</td>
+      <td><span class="chip ent-${r.entity}">${r.entity}</span></td>
       <td class="num">${fmtInt(r.leads)}</td>
       <td class="num">${fmtInt(r.won)}</td>
       <td class="num">${r.convRate!=null?fmtPct(r.convRate):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${r.cost>0?fmtMoney(r.cost):'<span class="dash">'+EMDASH+'</span>'}</td>
+      <td class="num">${r.cpl!=null?fmtMoney(r.cpl):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${r.cac!=null?fmtMoney(r.cac):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${r.roi!=null?(r.roi>=0?'+':'')+r.roi.toFixed(0)+'%':'<span class="dash">'+EMDASH+'</span>'}</td>
-      <td class="num">${r.qualityRate!=null?fmtPct(r.qualityRate):'<span class="dash">'+EMDASH+'</span>'}</td>
+      <td class="num">${r.qualityScore!=null?fmtPct(r.qualityScore):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td><span class="chip reco-${r.reco}">${r.reco}</span></td>
-    </tr>`).join('') || '<tr><td colspan="9" class="empty-state">No data in this range.</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="11" class="empty-state">No data in this range.</td></tr>';
 }
 function renderRecoSimpleTable(tbodyId, rows, sortState){
   const sorted = sortByState(rows, sortState);
@@ -2864,22 +2856,24 @@ function renderRecoSimpleTable(tbodyId, rows, sortState){
       <td>${r.name}</td>
       <td class="num">${fmtInt(r.leads)}</td>
       <td class="num">${r.convRate!=null?fmtPct(r.convRate):'<span class="dash">'+EMDASH+'</span>'}</td>
+      <td class="num">${r.cpl!=null?fmtMoney(r.cpl):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${r.cac!=null?fmtMoney(r.cac):'<span class="dash">'+EMDASH+'</span>'}</td>
-      <td class="num">${r.qualityRate!=null?fmtPct(r.qualityRate):'<span class="dash">'+EMDASH+'</span>'}</td>
+      <td class="num">${r.qualityScore!=null?fmtPct(r.qualityScore):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td><span class="chip reco-${r.reco}">${r.reco}</span></td>
-    </tr>`).join('') || '<tr><td colspan="6" class="empty-state">No data in this range.</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="7" class="empty-state">No data in this range.</td></tr>';
 }
 
 function renderRecommendations(){
-  ['Global','Saudi'].forEach(ent=>{
-    const {campaigns, geos, channels} = computeRecoForEntity(ent);
-    renderRecoCampaignTable('recoCampaignBody'+ent, campaigns, recoStates['campaign'+ent]);
-    renderRecoSimpleTable('recoGeoBody'+ent, geos, recoStates['geo'+ent]);
-    renderRecoSimpleTable('recoChannelBody'+ent, channels, recoStates['channel'+ent]);
-    updateSortArrows('recoCampaignTable'+ent, recoStates['campaign'+ent]);
-    updateSortArrows('recoGeoTable'+ent, recoStates['geo'+ent]);
-    updateSortArrows('recoChannelTable'+ent, recoStates['channel'+ent]);
-  });
+  const {campaigns, geos} = computeRecoCombined();
+  renderRecoCampaignTable('recoCampaignBody', campaigns, recoStates.campaign);
+  updateSortArrows('recoCampaignTable', recoStates.campaign);
+  const showGeo = state.entity !== 'Saudi';
+  const geoCard = document.getElementById('recoGeoCard');
+  if(geoCard) geoCard.style.display = showGeo ? '' : 'none';
+  if(showGeo){
+    renderRecoSimpleTable('recoGeoBody', geos, recoStates.geo);
+    updateSortArrows('recoGeoTable', recoStates.geo);
+  }
 }
 
 /* ---------------- alerts ---------------- */
@@ -3581,12 +3575,8 @@ function init(){
     ['bdeTableGlobalCsv','bdeTableGlobal','bde-global'],
     ['bdeTableSaudiCsv','bdeTableSaudi','bde-saudi'],
     ['bdeCampaignTableSaudiCsv','bdeCampaignTableSaudi','bde-campaign-saudi'],
-    ['recoCampaignTableGlobalCsv','recoCampaignTableGlobal','reco-campaigns-global'],
-    ['recoGeoTableGlobalCsv','recoGeoTableGlobal','reco-geography-global'],
-    ['recoChannelTableGlobalCsv','recoChannelTableGlobal','reco-channel-global'],
-    ['recoCampaignTableSaudiCsv','recoCampaignTableSaudi','reco-campaigns-saudi'],
-    ['recoGeoTableSaudiCsv','recoGeoTableSaudi','reco-geography-saudi'],
-    ['recoChannelTableSaudiCsv','recoChannelTableSaudi','reco-channel-saudi'],
+    ['recoCampaignTableCsv','recoCampaignTable','reco-campaigns'],
+    ['recoGeoTableCsv','recoGeoTable','reco-geography'],
     ['alertLeadFlowTableCsv','alertLeadFlowTable','alert-lead-flow'],
     ['alertBdeTableCsv','alertBdeTable','alert-bde'],
     ['alertCampaignTableCsv','alertCampaignTable','alert-campaign'],
@@ -3676,11 +3666,8 @@ function init(){
   wireSort('bdeTableGlobal', bdeStateGlobal, renderBde);
   wireSort('bdeTableSaudi', bdeStateSaudi, renderBde);
   wireSort('bdeCampaignTableSaudi', bdeCampaignState, renderBde);
-  ['campaign','geo','channel'].forEach(dim=>{
-    ['Global','Saudi'].forEach(ent=>{
-      wireSort(dim==='campaign'?('recoCampaignTable'+ent):(dim==='geo'?('recoGeoTable'+ent):('recoChannelTable'+ent)), recoStates[dim+ent], renderRecommendations);
-    });
-  });
+  wireSort('recoCampaignTable', recoStates.campaign, renderRecommendations);
+  wireSort('recoGeoTable', recoStates.geo, renderRecommendations);
   const alertBdeState = {key:'baseConv', dir:'desc'};
   const alertCampaignState = {key:'cplChange', dir:'desc'};
   const alertLeadFlowState = {key:'gap', dir:'desc'};
