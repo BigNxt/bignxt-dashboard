@@ -656,6 +656,31 @@
       <div class="chint" style="margin-bottom:0;">&ldquo;Untouched&rdquo; leads have no logged contact attempt yet &mdash; a diligence signal independent of lead quality. Rows shaded red sit meaningfully below their <em>own team&rsquo;s</em> median on lead&rarr;admission conversion (among BDEs with 10+ leads) &mdash; a flag to look into, not an automatic verdict, since lead mix still varies BDE to BDE.</div>
     </div>
     <div class="card" style="margin-top:14px;">
+      <div class="card-head"><h2>BDE dial activity</h2><button type="button" class="csv-btn" id="bdeDialStageTableCsv">Download CSV</button></div>
+      <div class="chint">How many leads each BDE currently has sitting at each dial count, from the CRM's own Sub-Status field (&ldquo;1 Dial&rdquo; through &ldquo;10+ Dials&rdquo;) &mdash; a call-volume/diligence signal, separate from the funnel-stage columns above. &ldquo;Other&rdquo; covers every resolved/disposed Sub-Status that isn't a dial-count marker (e.g. Wrong Number, Not Interested), so each row still sums to that BDE's full lead count. Both teams pooled into one table since dial activity is a cross-team operational concern.</div>
+      <div class="tablewrap"><table id="bdeDialStageTable">
+        <thead><tr>
+          <th data-key="owner">BDE<span class="arrow">&#9662;</span></th>
+          <th data-key="entity">Entity<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="leads">Leads<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="Untouched">Untouched<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="1 Dial">1&nbsp;Dial<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="2 Dials">2&nbsp;Dials<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="3 Dials">3&nbsp;Dials<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="4 Dials">4&nbsp;Dials<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="5 Dials">5&nbsp;Dials<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="6 Dials">6&nbsp;Dials<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="7 Dials">7&nbsp;Dials<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="8 Dials">8&nbsp;Dials<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="9 Dials">9&nbsp;Dials<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="10 Dials">10&nbsp;Dials<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="10+ Dials">10+&nbsp;Dials<span class="arrow">&#9662;</span></th>
+          <th class="num" data-key="Other">Other<span class="arrow">&#9662;</span></th>
+        </tr></thead>
+        <tbody id="bdeDialStageBody"></tbody>
+      </table></div>
+    </div>
+    <div class="card" style="margin-top:14px;">
       <div class="card-head"><h2>Saudi BDE performance by campaign</h2><button type="button" class="csv-btn" id="bdeCampaignTableSaudiCsv">Download CSV</button></div>
       <div class="chint">Saudi only: how many leads each BDE received from a specific campaign, and the exact count currently sitting at each funnel stage (not a rate) &mdash; Call Back through Application are CRM-status based; Payments is Payment-sheet sourced, joined by BDE name (same conservative match used elsewhere in this tab) and the payment&rsquo;s own campaign field.</div>
       <div class="tablewrap"><table id="bdeCampaignTableSaudi">
@@ -1099,7 +1124,8 @@ function deriveWeekMonth(rows){
 const SHORT_KEY_MAP = {
   d:'day', e:'entity', dg:'degree', ch:'channel', c:'campaign', g:'geo', u:'university',
   sp:'specialization', o:'owner', l:'leads', w:'won', ut:'untouched', st:'statuses',
-  ac:'account', im:'impressions', cl:'clicks', co:'cost', lc:'linkClicks', pl:'platformLeads'
+  ac:'account', im:'impressions', cl:'clicks', co:'cost', lc:'linkClicks', pl:'platformLeads',
+  ds:'dialStages'
 };
 function expandKeys(rows){
   return rows.map(r=>{
@@ -2714,6 +2740,50 @@ function bdeCampaignLeaderboard(rows, paymentByOwnerCampaign){
   }).sort((a,b)=>b.leads-a.leads);
 }
 
+// Dial-stage order for display - "Untouched" (0 dials made) first, then ascending dial count,
+// "Other" (every resolved/disposed SubStatus that isn't a dial-count marker, e.g. "Wrong Number",
+// "Not Interested for the course") last, so a row's columns still sum to its full lead count.
+const DIAL_STAGE_ORDER = ['Untouched','1 Dial','2 Dials','3 Dials','4 Dials','5 Dials','6 Dials','7 Dials','8 Dials','9 Dials','10 Dials','10+ Dials','Other'];
+
+// Pools BOTH entities into one table (tagged by each BDE's primary entity via
+// OWNER_PRIMARY_ENTITY, same as everywhere else this dashboard splits a BDE into one team) -
+// dial-activity/diligence tracking is a cross-team operational concern, not something that needs
+// separate Global/Saudi panels the way the main leaderboard does.
+function bdeDialStageBreakdown(rows){
+  const map = new Map();
+  for(const r of rows){
+    let o = map.get(r.owner);
+    if(!o){
+      o = {owner:r.owner, entity: OWNER_PRIMARY_ENTITY[r.owner] || r.entity, leads:0};
+      DIAL_STAGE_ORDER.forEach(s=>{ o[s]=0; });
+      map.set(r.owner,o);
+    }
+    o.leads += r.leads;
+    const ds = r.dialStages || {};
+    for(const label in ds){
+      const bucket = DIAL_STAGE_ORDER.includes(label) ? label : 'Other';
+      o[bucket] = (o[bucket]||0) + ds[label];
+    }
+  }
+  return Array.from(map.values());
+}
+
+const bdeDialStageState = { key:'leads', dir:'desc' };
+function renderBdeDialStageTable(){
+  const rangeBde = ALL_BDE.filter(r => matchesDate(r) && degreeChannelMatch(r)
+    && (state.bdeOwners.length===0 || state.bdeOwners.includes(r.owner)));
+  const list = bdeDialStageBreakdown(rangeBde);
+  const sorted = sortByState(list, bdeDialStageState);
+  document.getElementById('bdeDialStageBody').innerHTML = sorted.map(o=>`
+    <tr>
+      <td>${o.owner}</td>
+      <td>${o.entity}</td>
+      <td class="num">${fmtInt(o.leads)}</td>
+      ${DIAL_STAGE_ORDER.map(s=>`<td class="num">${fmtInt(o[s])}</td>`).join('')}
+    </tr>`).join('') || `<tr><td colspan="${3+DIAL_STAGE_ORDER.length}" class="empty-state">No BDE data for this selection.</td></tr>`;
+  updateSortArrows('bdeDialStageTable', bdeDialStageState);
+}
+
 const bdeCampaignState = { key:'leads', dir:'desc' };
 function renderBdeCampaignTable(){
   const rangeBde = ALL_BDE.filter(r => OWNER_PRIMARY_ENTITY[r.owner]==='Saudi' && matchesDate(r) && degreeChannelMatch(r)
@@ -2744,6 +2814,7 @@ function renderBde(){
   renderBdeEntityPanel('Global', bdeStateGlobal, paymentAdm);
   renderBdeEntityPanel('Saudi', bdeStateSaudi, paymentAdm);
   renderBdeCampaignTable();
+  renderBdeDialStageTable();
 }
 
 /* ---------------- recommendations (scale / optimize / pause) ---------------- */
@@ -3679,6 +3750,7 @@ function init(){
     ['bdeTableGlobalCsv','bdeTableGlobal','bde-global'],
     ['bdeTableSaudiCsv','bdeTableSaudi','bde-saudi'],
     ['bdeCampaignTableSaudiCsv','bdeCampaignTableSaudi','bde-campaign-saudi'],
+    ['bdeDialStageTableCsv','bdeDialStageTable','bde-dial-stages'],
     ['recoCampaignTableCsv','recoCampaignTable','reco-campaigns'],
     ['recoGeoTableCsv','recoGeoTable','reco-geography'],
     ['alertLeadFlowTableCsv','alertLeadFlowTable','alert-lead-flow'],
@@ -3770,6 +3842,7 @@ function init(){
   wireSort('bdeTableGlobal', bdeStateGlobal, renderBde);
   wireSort('bdeTableSaudi', bdeStateSaudi, renderBde);
   wireSort('bdeCampaignTableSaudi', bdeCampaignState, renderBde);
+  wireSort('bdeDialStageTable', bdeDialStageState, renderBde);
   wireSort('recoCampaignTable', recoStates.campaign, renderRecommendations);
   wireSort('recoGeoTable', recoStates.geo, renderRecommendations);
   const alertBdeState = {key:'baseConv', dir:'desc'};
