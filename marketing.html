@@ -992,6 +992,7 @@
         <th class="num" data-key="impressions">Impr.<span class="arrow">&#9662;</span></th>
         <th class="num" data-key="clicks">Clicks<span class="arrow">&#9662;</span></th>
         <th class="num" data-key="cpl">CPL<span class="arrow">&#9662;</span></th>
+        <th class="num has-tip" data-key="cpp" title="Cost per Prospect: ad spend / leads that have reached Prospect or any later stage (Hot Prospect, Meeting, Application, Admission) by current CRM status. Hover a value for the prospect count behind it.">CPP<span class="arrow">&#9662;</span></th>
         <th class="num" data-key="cac">CAC<span class="arrow">&#9662;</span></th>
         <th class="num" data-key="feeAED">Fee&nbsp;Booked&nbsp;(AED)<span class="arrow">&#9662;</span></th>
         <th class="num" data-key="roi">ROI<span class="arrow">&#9662;</span></th>
@@ -1022,6 +1023,7 @@
       <li><strong>Campaign join.</strong> Ad spend is matched to CRM leads by exact campaign name, which recovers 94.5% of tracked ad spend across all three platforms (163 of 206 ad campaigns). Unmatched campaigns are usually traffic/awareness objectives that aren&rsquo;t expected to log CRM leads directly &mdash; <strong>except on Google Ads</strong>, where the match rate is unusually low (about 1% of Google spend matched): the CRM&rsquo;s recorded campaign value for Google traffic (e.g. &ldquo;RRU / Africa Search / 18/4/2026 / G&rdquo;) doesn&rsquo;t exactly match the real Google Ads campaign name (&ldquo;RRU / Africa / Search / 18/4/2026 / G&rdquo;) &mdash; likely a UTM-tagging mismatch on the Google side, unlike Meta/LinkedIn where the tagging lines up. Worth fixing at the source so Google spend joins correctly here.</li>
       <li><strong>Adset drill-down (Campaign table&rsquo;s &ldquo;+&rdquo; column, added 2026-09-22).</strong> Expands a campaign row into its individual Meta adsets, with the same full lead&rarr;payment funnel shown at campaign level &mdash; the adset name itself already names the country/audience for every campaign that uses this feature, so no separate Geography column is shown. Ad spend/CPL/CAC is backfilled to <strong>18 Aug 2026</strong>, matching the date the CRM&rsquo;s own AdsetName field started being populated consistently (it existed sporadically before that on a handful of leads, not reliably enough to trust) &mdash; pulling spend further back than the CRM can actually match it against wouldn&rsquo;t give a real funnel, just spend with no context. <strong>Admissions here are CRM &ldquo;Admission Done&rdquo; status, not Payment-sheet sourced</strong> like every other admissions figure on this report &mdash; the Payment sheet has no AdsetName column to join on, so there&rsquo;s no finance-verified source at this granularity; treat this one table as the exception. Only campaigns with more than one distinct adset show an active &ldquo;+&rdquo;; a single-adset campaign has nothing further to reveal. LinkedIn and Google have no adset-equivalent concept, so this only ever applies to Meta/Facebook campaigns.</li>
       <li><strong>Stage-to-stage conversion.</strong> Most of these rates measure &ldquo;reached a stage or any later one&rdquo; (a lead that reached Meeting Done and was later marked Lost still counts as having reached it) &mdash; a floor, not exact cohort tracking, since Status is a snapshot with no history log. <strong>Lead &rarr; Call Back, Lead &rarr; Recontactable, Lead &rarr; Suspect, Lead &rarr; Prospect and Lead &rarr; Hot Prospect are the exception: they count leads sitting in that exact status right now</strong>, not cumulatively through later stages &mdash; deliberately, since all five are subjective/BDE-applied tags on a still-working lead, not a required workflow gate, so a lead very often moves straight to Meeting Scheduled or Application Filled without ever passing through any of them; counting those as &ldquo;reached Hot Prospect&rdquo; measurably overstated it (verified against a BDE&rsquo;s own CRM status filter: this dashboard read 2.3%, the CRM&rsquo;s own count was 0.1%). These rows show percentage only, not a fraction, for the same reason &mdash; the underlying count is a shifting snapshot (leads sitting there today can move to any other stage tomorrow), not a stable cohort size worth quoting as a raw number. &ldquo;&hellip;&rarr; Payment&rdquo; figures (Meeting Done/Application &rarr; Payment, the standalone Lead &rarr; Payment rate, and the funnel chart&rsquo;s own Admission bar) are Payment-sheet sourced, not the CRM&rsquo;s Admission Done status &mdash; see the Admissions/ROI/Revenue note below.</li>
+      <li><strong>Cost per Prospect (CPP, added 2026-10-06).</strong> Ad spend divided by leads that have reached Prospect <em>or any later stage</em> (Hot Prospect, Meeting Scheduled/Done, Application Filled, Admission Done) by their current CRM status &mdash; shown after CPL in the Trends KPI row, in the Campaign performance table and in its adset drill-down (hover any CPP value for its prospect count; adset spend only exists from 18 Aug 2026, so earlier adset rows show a dash). This is deliberately cumulative, unlike the snapshot-style &ldquo;Lead &rarr; Prospect&rdquo; rate above: a prospect that has since moved on to a meeting or application still cost money to generate. Because leads keep progressing for weeks, the newest campaigns and periods read high (or blank) until their leads mature &mdash; compare older periods, or read recent CPP together with the prospect count rather than trusting the latest delta.</li>
       <li><strong>Summary tab is always entity-split.</strong> Global and Saudi run separate budgets/targets, so Summary shows Global and Saudi side by side rather than toggling between them; the top Entity control only scopes Trends and the campaign table. Degree/University/Program/Channel/Country/Region filters narrow Summary the same way they narrow every other tab.</li>
       <li data-tab="hide-ceo"><strong>BDE &amp; Recommendations tabs are also always entity-split,</strong> for the same reason as Summary. Degree/University/Program/Channel/Country/Region and the date range narrow both exactly like Summary.</li>
       <li><strong>Geography, Country &amp; Region filters.</strong> Geography is read primarily from the campaign&rsquo;s own target-country naming (more reliable than the CRM&rsquo;s free-text Country field), falling back to a normalized Country field for organic/offline leads. Saudi cities (Riyadh/Jeddah/Dammam/Medina) roll up into one Saudi Arabia row. The Region filter groups geographies into three named buckets &mdash; <em>Saudi</em> (Saudi Arabia only), <em>GCC</em> (Kuwait, UAE, Qatar, Oman, Bahrain &mdash; excludes Saudi, tracked separately), and <em>Africa</em> &mdash; countries outside all three (India, US, UK, etc.) are only reachable via the Country dropdown.</li>
@@ -1464,7 +1466,7 @@ function funnelConversions(rows, admissionOverride){
   // Back and Lead -> Recontactable at indices 0-1, shifting everything below down by two - also
   // shifted segmentFunnelQuality()'s Meeting Done lookup; 2026-10-01: inserted Lead -> Suspect at
   // index 2, shifting everything from Prospect onward down by one again).
-  return [
+  const out = [
     {label:'Lead &rarr; Call Back', num:callBack, den:totalLeads, pct:rate(callBack, totalLeads), snapshot:true},
     {label:'Lead &rarr; Recontactable', num:recontactable, den:totalLeads, pct:rate(recontactable, totalLeads), snapshot:true},
     {label:'Lead &rarr; Suspect', num:suspect, den:totalLeads, pct:rate(suspect, totalLeads), snapshot:true},
@@ -1478,7 +1480,18 @@ function funnelConversions(rows, admissionOverride){
     {label:'Application &rarr; Payment', num:admitted, den:applied, pct:rate(admitted, applied)},
     {label:'Lead &rarr; Payment', num:admitted, den:totalLeads, pct:rate(admitted, totalLeads)}
   ];
+  // Leads that have reached Prospect OR ANY LATER stage (Hot Prospect, Meeting, Application,
+  // Admission) by current CRM status - the denominator for Cost per Prospect (CPP, 2026-10-06).
+  // Deliberately cumulative, unlike the snapshot-style "Lead -> Prospect" rate above: a lead that has
+  // since moved on to a meeting/application is still a prospect that cost money to generate, and
+  // counting only leads currently sitting in the Prospect status would make CPP look worse as the
+  // pipeline progresses. Attached as a property (not a new array entry) so every positional
+  // conv[N] reader above keeps working unchanged.
+  out.prospects = cum['Qualified']||0;
+  return out;
 }
+
+function prospectsOf(rows){ return cumulativeFunnel(rows).cum['Qualified']||0; }
 
 function channelMix(rows){
   const counts = {};
@@ -1557,6 +1570,8 @@ function campaignTable(crmRows, adsRows){
       convRate: o.leads>0 ? (won/o.leads*100) : 0,
       cost: ad ? ad.cost : null, impressions: ad ? ad.impressions : null, clicks: ad ? ad.clicks : null,
       cpl: (ad && o.leads>0) ? ad.cost/o.leads : null,
+      prospects: conv.prospects,
+      cpp: (ad && ad.cost>0 && conv.prospects>0) ? ad.cost/conv.prospects : null,
       cac: (ad && won>0) ? ad.cost/won : null,
       feeAED: fee ? fee.feeAED : null,
       roi: (fee && ad && ad.cost>0) ? (fee.feeAED-ad.cost)/ad.cost*100 : null,
@@ -1572,7 +1587,7 @@ function campaignTable(crmRows, adsRows){
       rows.push({
         campaign, status: CAMPAIGN_STATUS_MAP.get(campaign) || null,
         entity:ad.entity, degree:ad.degree, channel:ad.channel, geo:ad.geo, leads:0, won, convRate:0,
-        cost:ad.cost, impressions:ad.impressions, clicks:ad.clicks, cpl:null,
+        cost:ad.cost, impressions:ad.impressions, clicks:ad.clicks, cpl:null, prospects:0, cpp:null,
         cac: won>0 ? ad.cost/won : null,
         feeAED: fee ? fee.feeAED : null,
         roi: (fee && ad.cost>0) ? (fee.feeAED-ad.cost)/ad.cost*100 : null,
@@ -1594,7 +1609,7 @@ function campaignTable(crmRows, adsRows){
     rows.push({
       campaign, status: CAMPAIGN_STATUS_MAP.get(campaign) || null,
       entity:fee.entity, degree:fee.degree, channel:fee.channel, geo:fee.geo, leads:0, won:fee.admissions, convRate:0,
-      cost:null, impressions:null, clicks:null, cpl:null, cac:null,
+      cost:null, impressions:null, clicks:null, cpl:null, prospects:0, cpp:null, cac:null,
       feeAED: fee.feeAED,
       roi: null,
       leadToCallBack:null, leadToRecontactable:null, leadToSuspect:null,
@@ -1940,6 +1955,16 @@ function renderKpis(filteredCRM, filteredAds, periods){
   const curCPL = (curSpend && curLeads) ? curSpend/curLeads : null;
   const prevCPL = (prevSpend && prevLeads) ? prevSpend/prevLeads : null;
 
+  // Cost per Prospect: spend / leads that have reached Prospect or later (see prospectsOf). Newest
+  // periods read artificially high until their leads mature, so the delta (and the tile's tooltip)
+  // call that out rather than hiding it.
+  const totalProspects = prospectsOf(filteredCRM);
+  const cpp = (totalSpend>0 && totalProspects>0) ? totalSpend/totalProspects : null;
+  const curProspects = n>0 ? prospectsOf(filteredCRM.filter(r=>r[state.gran]===periods[n-1])) : null;
+  const prevProspects = n>1 ? prospectsOf(filteredCRM.filter(r=>r[state.gran]===periods[n-2])) : null;
+  const curCPP = (curSpend && curProspects) ? curSpend/curProspects : null;
+  const prevCPP = (prevSpend && prevProspects) ? prevSpend/prevProspects : null;
+
   // Admissions/Revenue delta: latest payment cycle in range vs the one before it.
   const monthTotals = new Map(), monthFee = new Map(), monthPaid = new Map();
   for(const r of rangePayments){
@@ -1979,6 +2004,8 @@ function renderKpis(filteredCRM, filteredAds, periods){
     {label:'Conversion rate', value:fmtPct(convRate), delta:deltaHtml(curConv, prevConv, false, 'cycle')},
     {label:'Ad spend (AED)', value:fmtMoney(totalSpend), delta:deltaHtml(curSpend, prevSpend)},
     {label:'Blended CPL (AED)', value:blendedCPL!=null?fmtMoney(blendedCPL):EMDASH, delta:deltaHtml(curCPL, prevCPL, true)},
+    {label:'Cost per prospect (AED)', value:cpp!=null?fmtMoney(cpp):EMDASH, delta:deltaHtml(curCPP, prevCPP, true),
+      tip:`CPP = ad spend / leads that have reached Prospect or any later stage (Hot Prospect, Meeting, Application, Admission) by current CRM status. ${fmtInt(totalProspects)} prospects in this view. Leads keep progressing, so the newest periods read high until they mature - compare older periods or whole ranges rather than the latest delta.`},
     {label:'CAC (AED)', value:cac!=null?fmtMoney(cac):EMDASH, delta:deltaHtml(curCAC, prevCAC, true, 'cycle')},
     {label:'Revenue (AED)', value:fmtMoney(totalFeeAED), delta:deltaHtml(curFee, prevFee, false, 'cycle')},
     {label:'Payment received (AED)', value:fmtMoney(totalPaidAED), delta:deltaHtml(curPaid, prevPaid, false, 'cycle')},
@@ -1986,7 +2013,7 @@ function renderKpis(filteredCRM, filteredAds, periods){
   ];
   const row = document.getElementById('kpiRow');
   row.innerHTML = tiles.map(t=>`
-    <div class="tile">
+    <div class="tile"${t.tip?` title="${t.tip.replace(/"/g,'&quot;')}"`:''}>
       <div class="tlabel">${t.label}</div>
       <div class="tvalue num">${t.value}</div>
       ${t.delta}
@@ -2045,6 +2072,8 @@ function adsetBreakdown(campaign){
       adset, leads, won, cost,
       convRate: leads>0 ? won/leads*100 : null,
       cpl: (cost>0 && leads>0) ? cost/leads : null,
+      prospects: conv.prospects,
+      cpp: (cost>0 && conv.prospects>0) ? cost/conv.prospects : null,
       cac: (cost>0 && won>0) ? cost/won : null,
       leadToCallBack: conv[0].pct, leadToRecontactable: conv[1].pct, leadToSuspect: conv[2].pct, leadToProspect: conv[3].pct,
       leadToHotProspect: conv[4].pct, leadToMeetingScheduled: conv[5].pct, leadToMeetingDone: conv[6].pct,
@@ -2076,7 +2105,7 @@ function multiAdsetCampaigns(){
 function adsetSubRowHtml(campaign){
   const rows = adsetBreakdown(campaign);
   if(rows.length===0){
-    return `<tr class="adset-row"><td></td><td colspan="27"><div class="adset-empty">No adset data for the current date range.</div></td></tr>`;
+    return `<tr class="adset-row"><td></td><td colspan="28"><div class="adset-empty">No adset data for the current date range.</div></td></tr>`;
   }
   const pctOrDash = v => v!=null ? fmtPct(v) : '<span class="dash">'+EMDASH+'</span>';
   const body = rows.map(a=>`
@@ -2087,6 +2116,7 @@ function adsetSubRowHtml(campaign){
       <td class="num">${a.convRate!=null?fmtPct(a.convRate):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${a.cost>0?fmtMoney(a.cost):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${a.cpl!=null?fmtMoney(a.cpl):'<span class="dash">'+EMDASH+'</span>'}</td>
+      <td class="num" title="${a.prospects} prospect${a.prospects===1?'':'s'} (reached Prospect or later)">${a.cpp!=null?fmtMoney(a.cpp):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${a.cac!=null?fmtMoney(a.cac):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${pctOrDash(a.leadToCallBack)}</td>
       <td class="num">${pctOrDash(a.leadToRecontactable)}</td>
@@ -2100,11 +2130,11 @@ function adsetSubRowHtml(campaign){
       <td class="num">${pctOrDash(a.meetingDoneToPayment)}</td>
       <td class="num">${pctOrDash(a.applicationToPayment)}</td>
     </tr>`).join('');
-  return `<tr class="adset-row"><td></td><td colspan="27">
+  return `<tr class="adset-row"><td></td><td colspan="28">
     <table class="adset-subtable">
       <thead><tr>
         <th>Adset</th><th class="num">Leads</th><th class="num">Admissions</th><th class="num">Conv.&nbsp;%</th>
-        <th class="num">Spend (AED)</th><th class="num">CPL</th><th class="num">CAC</th>
+        <th class="num">Spend (AED)</th><th class="num">CPL</th><th class="num" title="Cost per Prospect: spend / leads that reached Prospect or later. Hover a value for the prospect count.">CPP</th><th class="num">CAC</th>
         <th class="num">Lead&rarr;Call&nbsp;Back</th><th class="num">Lead&rarr;Recontactable</th><th class="num">Lead&rarr;Suspect</th>
         <th class="num">Lead&rarr;Prospect</th><th class="num">Lead&rarr;Hot&nbsp;Prospect</th>
         <th class="num">Lead&rarr;Mtg&nbsp;Scheduled</th><th class="num">Lead&rarr;Mtg&nbsp;Done</th>
@@ -2155,6 +2185,7 @@ function renderTable(rows){
       <td class="num">${r.impressions!=null?fmtInt(r.impressions):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${r.clicks!=null?fmtInt(r.clicks):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${r.cpl!=null?fmtMoney(r.cpl):'<span class="dash">'+EMDASH+'</span>'}</td>
+      <td class="num"${r.prospects!=null?` title="${r.prospects} prospect${r.prospects===1?'':'s'} (reached Prospect or later)"`:''}>${r.cpp!=null?fmtMoney(r.cpp):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${r.cac!=null?fmtMoney(r.cac):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${r.feeAED!=null?fmtMoney(r.feeAED):'<span class="dash">'+EMDASH+'</span>'}</td>
       <td class="num">${r.roi!=null?(r.roi>=0?'+':'')+r.roi.toFixed(0)+'%':'<span class="dash">'+EMDASH+'</span>'}</td>
@@ -2171,7 +2202,7 @@ function renderTable(rows){
       <td class="num">${pctOrDash(r.applicationToPayment)}</td>
     </tr>`;
     return mainRow + (expanded ? adsetSubRowHtml(r.campaign) : '');
-  }).join('') || '<tr><td colspan="28" class="empty-state">No campaigns match.</td></tr>';
+  }).join('') || '<tr><td colspan="29" class="empty-state">No campaigns match.</td></tr>';
 
   document.getElementById('tableFoot').textContent =
     total>300 ? `Showing top 300 of ${total.toLocaleString()} matching campaigns ${EMDASH} sort or search to narrow.` : `${total.toLocaleString()} campaign${total===1?'':'s'}.`;
@@ -2195,7 +2226,7 @@ function round2(v){ return v==null ? null : Math.round(v*100)/100; }
 // them directly rather than needing to be re-parsed first.
 async function downloadCampaignCsv(){
   const headers = ['Campaign','Status','Entity','Degree','Channel','Geography','Leads','Admissions','Conv. %',
-    'Spend (AED)','Impr.','Clicks','CPL','CAC','Fee Booked (AED)','ROI %',
+    'Spend (AED)','Impr.','Clicks','CPL','Prospects (reached Prospect or later)','CPP','CAC','Fee Booked (AED)','ROI %',
     'Lead to Call Back %','Lead to Recontactable %','Lead to Suspect %',
     'Lead to Prospect %','Lead to Hot Prospect %','Lead to Meeting Scheduled %','Lead to Meeting Done %','Lead to Application %',
     'Meeting Done to Application %','Meeting Done to Payment %','Application to Payment %'];
@@ -2204,7 +2235,7 @@ async function downloadCampaignCsv(){
     lines.push([
       r.campaign, r.status||'', r.entity, r.degree, r.channel, r.geo,
       r.leads, r.won, round2(r.convRate),
-      round2(r.cost), r.impressions, r.clicks, round2(r.cpl), round2(r.cac),
+      round2(r.cost), r.impressions, r.clicks, round2(r.cpl), r.prospects, round2(r.cpp), round2(r.cac),
       round2(r.feeAED), round2(r.roi),
       round2(r.leadToCallBack), round2(r.leadToRecontactable), round2(r.leadToSuspect),
       round2(r.leadToProspect), round2(r.leadToHotProspect), round2(r.leadToMeetingScheduled), round2(r.leadToMeetingDone), round2(r.leadToApplication),
